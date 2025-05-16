@@ -1,7 +1,8 @@
-[gd_scene load_steps=26 format=4 uid="uid://io7b4jh3ku2v"]
+[gd_scene load_steps=31 format=4 uid="uid://io7b4jh3ku2v"]
 
 [ext_resource type="Texture2D" uid="uid://ba8qwbkow6gvc" path="res://models/colormap.png" id="1_c35m8"]
 [ext_resource type="Script" uid="uid://c4ts2lchf6o8u" path="res://scripts/car.gd" id="1_qt2eu"]
+[ext_resource type="Texture2D" uid="uid://h5erhcid1uu5" path="res://models/smoke_07.png" id="3_50v30"]
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_b0jew"]
 bounce = 0.1
@@ -233,6 +234,32 @@ shadow_mesh = SubResource("ArrayMesh_g7a63")
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_6mia2"]
 albedo_texture = ExtResource("1_c35m8")
 
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_qt2eu"]
+transparency = 1
+shading_mode = 0
+vertex_color_use_as_albedo = true
+albedo_texture = ExtResource("3_50v30")
+billboard_mode = 3
+billboard_keep_scale = true
+particles_anim_h_frames = 1
+particles_anim_v_frames = 1
+particles_anim_loop = false
+
+[sub_resource type="QuadMesh" id="QuadMesh_qt2eu"]
+size = Vector2(0.5, 0.5)
+
+[sub_resource type="Curve" id="Curve_qt2eu"]
+_data = [Vector2(0, 0.5), 0.0, 0.0, 0, 0, Vector2(0.05, 1), 1.4, 0.0, 0, 0]
+point_count = 2
+metadata/_snap_enabled = true
+metadata/_snap_count = 20
+
+[sub_resource type="Gradient" id="Gradient_qt2eu"]
+offsets = PackedFloat32Array(0, 0.05, 0.95, 1)
+colors = PackedColorArray(1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0)
+metadata/_snap_enabled = true
+metadata/_snap_count = 20
+
 [sub_resource type="Animation" id="Animation_qt2eu"]
 resource_name = "Hop"
 length = 0.2
@@ -306,6 +333,19 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.3, 0.3, 0.66)
 mesh = SubResource("ArrayMesh_hylxu")
 skeleton = NodePath("")
 surface_material_override/0 = SubResource("StandardMaterial3D_6mia2")
+
+[node name="CPUParticles3D" type="CPUParticles3D" parent="Car"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.25, 1.5)
+material_override = SubResource("StandardMaterial3D_qt2eu")
+amount = 16
+lifetime = 2.0
+mesh = SubResource("QuadMesh_qt2eu")
+emission_shape = 1
+emission_sphere_radius = 0.25
+gravity = Vector3(0, 0.25, 0.5)
+scale_amount_max = 2.0
+scale_amount_curve = SubResource("Curve_qt2eu")
+color_ramp = SubResource("Gradient_qt2eu")
 
 [node name="Camera" type="Camera3D" parent="Car"]
 transform = Transform3D(1, 0, 0, 0, 0.984808, 0.173648, 0, -0.173648, 0.984808, 0, 2, 4)
