@@ -1,4 +1,4 @@
-[gd_scene load_steps=31 format=4 uid="uid://io7b4jh3ku2v"]
+[gd_scene load_steps=32 format=4 uid="uid://io7b4jh3ku2v"]
 
 [ext_resource type="Texture2D" uid="uid://ba8qwbkow6gvc" path="res://models/colormap.png" id="1_c35m8"]
 [ext_resource type="Script" uid="uid://c4ts2lchf6o8u" path="res://scripts/car.gd" id="1_qt2eu"]
@@ -234,9 +234,33 @@ shadow_mesh = SubResource("ArrayMesh_g7a63")
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_6mia2"]
 albedo_texture = ExtResource("1_c35m8")
 
+[sub_resource type="Curve" id="Curve_50v30"]
+_data = [Vector2(0, 0), 0.0, 0.0, 0, 0, Vector2(0.0220588, 1), 45.3333, 0.0, 1, 1, Vector2(0.875, 1), 0.0, 0.0, 0, 0, Vector2(0.985294, 0), 0.0, 0.0, 0, 0]
+point_count = 4
+
+[sub_resource type="CurveTexture" id="CurveTexture_jtldb"]
+curve = SubResource("Curve_50v30")
+
+[sub_resource type="Curve" id="Curve_qt2eu"]
+_data = [Vector2(0, 0.5), 0.0, 0.0, 0, 0, Vector2(0.05, 1), 1.4, 0.0, 0, 0]
+point_count = 2
+metadata/_snap_enabled = true
+metadata/_snap_count = 20
+
+[sub_resource type="CurveTexture" id="CurveTexture_3mrxu"]
+curve = SubResource("Curve_qt2eu")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_cp117"]
+emission_shape = 1
+emission_sphere_radius = 0.25
+gravity = Vector3(0, 0.25, 0.5)
+scale_max = 2.0
+scale_curve = SubResource("CurveTexture_3mrxu")
+alpha_curve = SubResource("CurveTexture_jtldb")
+
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_qt2eu"]
 transparency = 1
-shading_mode = 0
+diffuse_mode = 3
 vertex_color_use_as_albedo = true
 albedo_texture = ExtResource("3_50v30")
 billboard_mode = 3
@@ -245,43 +269,11 @@ particles_anim_h_frames = 1
 particles_anim_v_frames = 1
 particles_anim_loop = false
 
-[sub_resource type="QuadMesh" id="QuadMesh_qt2eu"]
+[sub_resource type="QuadMesh" id="QuadMesh_4clw4"]
+material = SubResource("StandardMaterial3D_qt2eu")
 size = Vector2(0.5, 0.5)
 
-[sub_resource type="Curve" id="Curve_qt2eu"]
-_data = [Vector2(0, 0.5), 0.0, 0.0, 0, 0, Vector2(0.05, 1), 1.4, 0.0, 0, 0]
-point_count = 2
-metadata/_snap_enabled = true
-metadata/_snap_count = 20
-
-[sub_resource type="Gradient" id="Gradient_qt2eu"]
-offsets = PackedFloat32Array(0, 0.05, 0.95, 1)
-colors = PackedColorArray(1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0)
-metadata/_snap_enabled = true
-metadata/_snap_count = 20
-
-[sub_resource type="Animation" id="Animation_qt2eu"]
-resource_name = "Hop"
-length = 0.2
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath("Car/Model:position")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0, 0.1, 0.2),
-"transitions": PackedFloat32Array(1, 1, 1),
-"update": 0,
-"values": [Vector3(0, -0.5, 0), Vector3(0, -0.4, 0), Vector3(0, -0.5, 0)]
-}
-
-[sub_resource type="AnimationLibrary" id="AnimationLibrary_jtldb"]
-_data = {
-&"Hop": SubResource("Animation_qt2eu")
-}
-
-[node name="Car" type="Node3D"]
+[node name="Test Car" type="Node3D"]
 script = ExtResource("1_qt2eu")
 
 [node name="Ball" type="RigidBody3D" parent="."]
@@ -334,22 +326,18 @@ mesh = SubResource("ArrayMesh_hylxu")
 skeleton = NodePath("")
 surface_material_override/0 = SubResource("StandardMaterial3D_6mia2")
 
-[node name="CPUParticles3D" type="CPUParticles3D" parent="Car"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.25, 1.5)
-material_override = SubResource("StandardMaterial3D_qt2eu")
-amount = 16
-lifetime = 2.0
-mesh = SubResource("QuadMesh_qt2eu")
-emission_shape = 1
-emission_sphere_radius = 0.25
-gravity = Vector3(0, 0.25, 0.5)
-scale_amount_max = 2.0
-scale_amount_curve = SubResource("Curve_qt2eu")
-color_ramp = SubResource("Gradient_qt2eu")
-
 [node name="Camera" type="Camera3D" parent="Car"]
 transform = Transform3D(1, 0, 0, 0, 0.984808, 0.173648, 0, -0.173648, 0.984808, 0, 2, 4)
+doppler_tracking = 1
 fov = 80.0
+
+[node name="GPUParticles3D" type="GPUParticles3D" parent="Car"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.2, 1.5)
+lifetime = 2.0
+fixed_fps = 60
+local_coords = true
+process_material = SubResource("ParticleProcessMaterial_cp117")
+draw_pass_1 = SubResource("QuadMesh_4clw4")
 
 [node name="Drift Timer" type="Timer" parent="."]
 wait_time = 2.0
@@ -357,11 +345,6 @@ wait_time = 2.0
 [node name="Boost Timer" type="Timer" parent="."]
 wait_time = 0.8
 one_shot = true
-
-[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
-libraries = {
-&"": SubResource("AnimationLibrary_jtldb")
-}
 
 [connection signal="timeout" from="Drift Timer" to="." method="_on_drift_timer_timeout"]
 [connection signal="timeout" from="Boost Timer" to="." method="_on_boost_timer_timeout"]

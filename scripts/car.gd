@@ -7,12 +7,12 @@ extends Node3D
 @onready var CarBody = $Car/Model/body
 @onready var DriftTimer = $"Drift Timer"
 @onready var BoostTimer = $"Boost Timer"
-@onready var AnimPlayer = $AnimationPlayer
 @onready var Camera = $Car/Camera
+@onready var particle_emitter = $Car/GPUParticles3D
 
-var acceleration: float = 100.0
-var steering: float = 12.0
-var turn_speed: float = 3.5
+var acceleration: float = 150.0
+var steering: float = 15.0
+var turn_speed: float = 5.0
 var body_tilt: float = 0.0
 
 var speed_input: float = 0.0
@@ -22,23 +22,29 @@ var is_drifting: bool = false
 var drift_direction: float = 0.0
 var minimum_drift: bool = false
 var boost_speed: float = 1.0
-var drift_boost_speed: float = 1.75
+var drift_boost_speed: float = 200.0
 var drift_boost_time_factor: int = 0
 var drift_strength: float = 0.5
 
 
 func _physics_process(_delta):
 	Car.transform.origin = Ball.transform.origin
-	Ball.apply_central_force(-Car.global_transform.basis.z * speed_input * boost_speed)
+	if boost_speed == 1.0:
+		Ball.apply_central_force(-Car.global_transform.basis.z * speed_input)
+	else:
+		Ball.apply_central_force(-Car.global_transform.basis.z * boost_speed)
 
 
 func _process(delta):
 	var car_speed = Ball.linear_velocity.length()
 	var max_car_speed: float = 70.0
+	
 	speed_input = (Input.get_action_strength("Accelerate") - Input.get_action_strength("Brake")) * acceleration
 	rotate_input = deg_to_rad(steering) * (Input.get_action_strength("Left") - Input.get_action_strength("Right"))
-	RightWheel.rotation.y = rotate_input
-	LeftWheel.rotation.y = rotate_input
+	LeftWheel.rotation.y = lerp(LeftWheel.rotation.y, rotate_input, 10 * delta)
+	RightWheel.rotation.y = lerp(RightWheel.rotation.y, rotate_input, 10 * delta)
+	particle_emitter.rotation.y = lerp(particle_emitter.rotation.y, rotate_input, delta)
+	particle_emitter.process_material.gravity.z = car_speed / 10
 	
 	if Input.is_action_pressed("Drift") and not is_drifting and rotate_input != 0 and speed_input > 0:
 		StartDrift()
@@ -71,7 +77,7 @@ func _process(delta):
 	else:
 		target_fov = lerp(80.0, 110.0, speed_factor)
 	
-	Camera.fov = lerp(Camera.fov, target_fov, 0.1)
+	Camera.fov = lerp(Camera.fov, target_fov, 10 * delta)
 	
 	drift_boost_time_factor = clamp(drift_boost_time_factor, 0, 3)
 
@@ -83,14 +89,14 @@ func RotateCar(delta):
 	
 	var t = rotate_input * Ball.linear_velocity.length() / body_tilt
 	CarBody.rotation.y = lerp(CarBody.rotation.y, t, 10 * delta)
+	particle_emitter.position.x = lerp(particle_emitter.position.x, t * 1.5, 0.005)
 
 
 func StartDrift():
 	is_drifting = true
-	AnimPlayer.play("Hop")
 	minimum_drift = false
 	drift_direction = rotate_input
-	DriftTimer.start()
+	DriftTimer.start(1.0)
 
 
 func StopDrift():
