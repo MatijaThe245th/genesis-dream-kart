@@ -331,7 +331,7 @@ transform = Transform3D(1, 0, 0, 0, 0.984808, 0.173648, 0, -0.173648, 0.984808, 
 doppler_tracking = 1
 fov = 80.0
 
-[node name="GPUParticles3D" type="GPUParticles3D" parent="Car"]
+[node name="Particle Emitter" type="GPUParticles3D" parent="Car"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.2, 1.5)
 lifetime = 2.0
 fixed_fps = 60

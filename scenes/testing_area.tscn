@@ -1,4 +1,4 @@
-[gd_scene load_steps=87 format=4 uid="uid://c3brva72gh781"]
+[gd_scene load_steps=88 format=4 uid="uid://c3brva72gh781"]
 
 [ext_resource type="PackedScene" uid="uid://io7b4jh3ku2v" path="res://scenes/car.tscn" id="1_mb3qh"]
 [ext_resource type="Texture2D" uid="uid://h4xhxw1j3rac" path="res://icon.svg" id="1_mu1h5"]
@@ -575,6 +575,11 @@ size = Vector2(150, 150)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_xoq4j"]
 size = Vector2(150, 150)
 
+[sub_resource type="LabelSettings" id="LabelSettings_xoq4j"]
+font_size = 24
+shadow_size = 5
+shadow_color = Color(0, 0, 0, 1)
+
 [node name="Testing Area" type="Node3D"]
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
@@ -631,9 +636,9 @@ surface_material_override/23 = SubResource("StandardMaterial3D_4na6v")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Figure 8 Circuit"]
 shape = SubResource("ConcavePolygonShape3D_ydv7u")
 
-[node name="Mobile Controls" type="CanvasLayer" parent="."]
+[node name="UI" type="CanvasLayer" parent="."]
 
-[node name="Control" type="Control" parent="Mobile Controls"]
+[node name="Touch Controls" type="Control" parent="UI"]
 layout_mode = 3
 anchors_preset = 7
 anchor_left = 0.5
@@ -643,7 +648,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 0
 
-[node name="Left" type="TouchScreenButton" parent="Mobile Controls/Control"]
+[node name="Left" type="TouchScreenButton" parent="UI/Touch Controls"]
 position = Vector2(-575, -220)
 texture_normal = SubResource("PlaceholderTexture2D_ydv7u")
 shape = SubResource("RectangleShape2D_8hhwm")
@@ -651,7 +656,7 @@ passby_press = true
 action = "Left"
 visibility_mode = 1
 
-[node name="Right" type="TouchScreenButton" parent="Mobile Controls/Control"]
+[node name="Right" type="TouchScreenButton" parent="UI/Touch Controls"]
 position = Vector2(-375, -220)
 texture_normal = SubResource("PlaceholderTexture2D_xoq4j")
 shape = SubResource("RectangleShape2D_xoq4j")
@@ -659,7 +664,7 @@ passby_press = true
 action = "Right"
 visibility_mode = 1
 
-[node name="Brake" type="TouchScreenButton" parent="Mobile Controls/Control"]
+[node name="Brake" type="TouchScreenButton" parent="UI/Touch Controls"]
 position = Vector2(420, -220)
 texture_normal = SubResource("PlaceholderTexture2D_xoq4j")
 shape = SubResource("RectangleShape2D_xoq4j")
@@ -667,10 +672,25 @@ passby_press = true
 action = "Brake"
 visibility_mode = 1
 
-[node name="Drift" type="TouchScreenButton" parent="Mobile Controls/Control"]
+[node name="Drift" type="TouchScreenButton" parent="UI/Touch Controls"]
 position = Vector2(220, -220)
 texture_normal = SubResource("PlaceholderTexture2D_xoq4j")
 shape = SubResource("RectangleShape2D_xoq4j")
 passby_press = true
 action = "Drift"
 visibility_mode = 1
+
+[node name="HUD" type="Control" parent="UI"]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="Debug Label" type="Label" parent="UI/HUD"]
+layout_mode = 1
+offset_left = 61.0
+offset_top = 36.0
+offset_right = 209.0
+offset_bottom = 70.0
+text = "speed_input:"
+label_settings = SubResource("LabelSettings_xoq4j")

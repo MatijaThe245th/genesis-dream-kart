@@ -2,13 +2,14 @@ extends Node3D
 
 @onready var Ball = $Ball
 @onready var Car = $Car
-@onready var RightWheel = $"Car/Model/wheel-front-right"
 @onready var LeftWheel = $"Car/Model/wheel-front-left"
+@onready var RightWheel = $"Car/Model/wheel-front-right"
 @onready var CarBody = $Car/Model/body
 @onready var DriftTimer = $"Drift Timer"
 @onready var BoostTimer = $"Boost Timer"
 @onready var Camera = $Car/Camera
-@onready var particle_emitter = $Car/GPUParticles3D
+@onready var ParticleEmitter = $"Car/Particle Emitter"
+@onready var DebugLabel = $"../UI/HUD/Debug Label"
 
 var acceleration: float = 150.0
 var steering: float = 15.0
@@ -43,8 +44,8 @@ func _process(delta):
 	rotate_input = deg_to_rad(steering) * (Input.get_action_strength("Left") - Input.get_action_strength("Right"))
 	LeftWheel.rotation.y = lerp(LeftWheel.rotation.y, rotate_input, 10 * delta)
 	RightWheel.rotation.y = lerp(RightWheel.rotation.y, rotate_input, 10 * delta)
-	particle_emitter.rotation.y = lerp(particle_emitter.rotation.y, rotate_input, delta)
-	particle_emitter.process_material.gravity.z = car_speed / 10
+	ParticleEmitter.rotation.y = lerp(ParticleEmitter.rotation.y, rotate_input, delta)
+	ParticleEmitter.process_material.gravity.z = car_speed / 10
 	
 	if Input.is_action_pressed("Drift") and not is_drifting and rotate_input != 0 and speed_input > 0:
 		StartDrift()
@@ -86,6 +87,8 @@ func _process(delta):
 			Input.action_press("Accelerate")
 		else:
 			Input.action_release("Accelerate")
+	
+	DebugLabel.text = "speed_input: " + str(speed_input) + "\n" + "car_speed: " + str(car_speed) + "\n" + "drift_boost_time_factor: " + str(drift_boost_time_factor)
 
 
 func RotateCar(delta):
@@ -95,7 +98,7 @@ func RotateCar(delta):
 	
 	var t = rotate_input * Ball.linear_velocity.length() / body_tilt
 	CarBody.rotation.y = lerp(CarBody.rotation.y, t, 10 * delta)
-	particle_emitter.position.x = lerp(particle_emitter.position.x, t * 1.5, 0.005)
+	ParticleEmitter.position.x = lerp(ParticleEmitter.position.x, t * 1.5, 0.005)
 
 
 func StartDrift():
