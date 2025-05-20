@@ -55,7 +55,7 @@ func _process(delta):
 		drift_amount *= deg_to_rad(steering * drift_strength)
 		rotate_input = drift_direction + drift_amount
 		
-		body_tilt = 20.0
+		body_tilt = 30.0
 	else:
 		body_tilt = 60.0
 	
@@ -80,6 +80,12 @@ func _process(delta):
 	Camera.fov = lerp(Camera.fov, target_fov, 10 * delta)
 	
 	drift_boost_time_factor = clamp(drift_boost_time_factor, 0, 3)
+	
+	if DisplayServer.is_touchscreen_available():
+		if not Input.is_action_pressed("Brake"):
+			Input.action_press("Accelerate")
+		else:
+			Input.action_release("Accelerate")
 
 
 func RotateCar(delta):
