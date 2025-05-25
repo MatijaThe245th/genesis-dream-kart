@@ -273,7 +273,7 @@ particles_anim_loop = false
 material = SubResource("StandardMaterial3D_qt2eu")
 size = Vector2(0.5, 0.5)
 
-[node name="Test Car" type="Node3D"]
+[node name="TestCar" type="Node3D"]
 script = ExtResource("1_qt2eu")
 
 [node name="Ball" type="RigidBody3D" parent="."]
@@ -331,7 +331,7 @@ transform = Transform3D(1, 0, 0, 0, 0.984808, 0.173648, 0, -0.173648, 0.984808, 
 doppler_tracking = 1
 fov = 80.0
 
-[node name="Particle Emitter" type="GPUParticles3D" parent="Car"]
+[node name="ParticleEmitter" type="GPUParticles3D" parent="Car"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.2, 1.5)
 lifetime = 2.0
 fixed_fps = 60
@@ -339,12 +339,12 @@ local_coords = true
 process_material = SubResource("ParticleProcessMaterial_cp117")
 draw_pass_1 = SubResource("QuadMesh_4clw4")
 
-[node name="Drift Timer" type="Timer" parent="."]
+[node name="DriftTimer" type="Timer" parent="."]
 wait_time = 2.0
 
-[node name="Boost Timer" type="Timer" parent="."]
+[node name="BoostTimer" type="Timer" parent="."]
 wait_time = 0.8
 one_shot = true
 
-[connection signal="timeout" from="Drift Timer" to="." method="_on_drift_timer_timeout"]
-[connection signal="timeout" from="Boost Timer" to="." method="_on_boost_timer_timeout"]
+[connection signal="timeout" from="DriftTimer" to="." method="_on_drift_timer_timeout"]
+[connection signal="timeout" from="BoostTimer" to="." method="_on_boost_timer_timeout"]
