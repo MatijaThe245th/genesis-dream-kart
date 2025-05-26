@@ -338,6 +338,8 @@ local_coords = true
 process_material = SubResource("ParticleProcessMaterial_cp117")
 draw_pass_1 = SubResource("QuadMesh_4clw4")
 
+[node name="WheelSpinReference" type="Node3D" parent="."]
+
 [node name="DriftTimer" type="Timer" parent="."]
 wait_time = 2.0
 one_shot = true

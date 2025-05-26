@@ -7,6 +7,7 @@ extends Node3D
 @onready var BackRightWheel = $"Car/Model/BackRightWheel"
 @onready var FrontLeftWheel = $"Car/Model/FrontLeftWheel"
 @onready var FrontRightWheel = $"Car/Model/FrontRightWheel"
+@onready var WheelSpinReference = $WheelSpinReference
 @onready var CarBody = $Car/Model/Body
 @onready var DriftTimer = $"DriftTimer"
 @onready var BoostTimer = $"BoostTimer"
@@ -77,12 +78,13 @@ func _process(delta):
 	turn_force = deg_to_rad(STEERING_STRENGTH) * steering_input
 	
 	# Wheel model spin and rotation
-	BackLeftWheel.rotate_x(ball_speed * forward_direction * delta)
+	WheelSpinReference.rotate_x(ball_speed * forward_direction * delta)
+	BackLeftWheel.rotation.x = WheelSpinReference.rotation.x
 	BackRightWheel.rotation.x = BackLeftWheel.rotation.x
 	FrontLeftWheel.rotation.x = BackLeftWheel.rotation.x
 	FrontRightWheel.rotation.x = BackLeftWheel.rotation.x
 	
-	FrontLeftWheel.rotation.y = lerp(FrontLeftWheel.rotation.y, turn_force, 10 * delta)
+	FrontLeftWheel.rotation.y = lerp(FrontLeftWheel.rotation.y, steering_input / 1.5, 10 * delta)
 	FrontRightWheel.rotation.y = FrontLeftWheel.rotation.y
 	
 	# Smoke particle position and gravity
@@ -138,6 +140,17 @@ func turn(delta):
 	Car.global_transform = Car.global_transform.orthonormalized()
 	
 	CarBody.rotation.y = lerp(CarBody.rotation.y, turn_force * ball_speed / body_tilt, 10 * delta)
+	
+	# Fix wheel model positions
+	BackLeftWheel.position.x = lerp(BackLeftWheel.position.x, -CarBody.rotation.y * 0.5 + 0.3, 50 * delta)
+	BackRightWheel.position.x = lerp(BackRightWheel.position.x, -CarBody.rotation.y * 0.5 - 0.3, 50 * delta)
+	FrontLeftWheel.position.x = lerp(FrontLeftWheel.position.x, CarBody.rotation.y * 0.8 + 0.3, 50 * delta)
+	FrontRightWheel.position.x = lerp(FrontRightWheel.position.x, CarBody.rotation.y * 0.8 - 0.3, 50 * delta)
+	
+	BackLeftWheel.rotation.y = CarBody.rotation.y
+	BackRightWheel.rotation.y = CarBody.rotation.y
+	
+	# Fix particle emitter position
 	ParticleEmitter.position.x = lerp(ParticleEmitter.position.x, (turn_force * ball_speed / body_tilt) * PARTICLE_OFFSET, 5 * delta)
 
 
