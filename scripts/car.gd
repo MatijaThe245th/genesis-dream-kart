@@ -3,9 +3,11 @@ extends Node3D
 # Nodes
 @onready var Ball = $Ball
 @onready var Car = $Car
-@onready var LeftWheel = $"Car/Model/wheel-front-left"
-@onready var RightWheel = $"Car/Model/wheel-front-right"
-@onready var CarBody = $Car/Model/body
+@onready var BackLeftWheel = $"Car/Model/BackLeftWheel"
+@onready var BackRightWheel = $"Car/Model/BackRightWheel"
+@onready var FrontLeftWheel = $"Car/Model/FrontLeftWheel"
+@onready var FrontRightWheel = $"Car/Model/FrontRightWheel"
+@onready var CarBody = $Car/Model/Body
 @onready var DriftTimer = $"DriftTimer"
 @onready var BoostTimer = $"BoostTimer"
 @onready var Camera = $Car/Camera
@@ -30,8 +32,13 @@ const DRIFT_STRENGTH: float = 0.5
 const DRIFT_BOOST_SPEED: float = 200.0
 const DRIFT_BOOST_DURATION: Dictionary = {
 	1: 0.8,
-	2: 1.1,
-	3: 1.4,
+	2: 1.3,
+	3: 1.7,
+}
+const DRIFT_STAGE_DELAY: Dictionary = {
+	0: 1.0,
+	1: 1.5,
+	2: 2.3,
 }
 
 # States
@@ -39,7 +46,7 @@ var is_drifting: bool = false
 var is_boosting: bool = false
 
 # Dynamic variables
-var forward_direction: Vector3
+var forward_direction: int = 0
 var ball_speed: float = 0.0
 var speed_force: float = 0.0
 var turn_force: float = 0.0
@@ -50,27 +57,33 @@ var drift_boost_stage: int = 0
 
 func _physics_process(_delta):
 	# Attach car model to ball
-	forward_direction = -Car.global_transform.basis.z.normalized()
 	Car.transform.origin = Ball.transform.origin
 	
 	if not is_boosting:
-		Ball.apply_central_force(forward_direction * speed_force)
+		Ball.apply_central_force(-Car.global_transform.basis.z.normalized() * speed_force)
 	else:
-		Ball.apply_central_force(forward_direction * DRIFT_BOOST_SPEED)
+		Ball.apply_central_force(-Car.global_transform.basis.z.normalized() * DRIFT_BOOST_SPEED)
 
 
 func _process(delta):
 	ball_speed = Ball.linear_velocity.length()
+	forward_direction = round(-Car.global_transform.basis.z.normalized().dot(Ball.linear_velocity.normalized()))
 	
+	# Handle basic movement
 	var acceleration_input = Input.get_action_strength("Accelerate") - Input.get_action_strength("Brake")
 	var steering_input = Input.get_action_strength("Left") - Input.get_action_strength("Right")
 	
 	speed_force = acceleration_input * ACCELERATION
 	turn_force = deg_to_rad(STEERING_STRENGTH) * steering_input
 	
-	# Wheel model rotation
-	LeftWheel.rotation.y = lerp(LeftWheel.rotation.y, turn_force, 10 * delta)
-	RightWheel.rotation.y = lerp(RightWheel.rotation.y, turn_force, 10 * delta)
+	# Wheel model spin and rotation
+	BackLeftWheel.rotate_x(ball_speed * forward_direction * delta)
+	BackRightWheel.rotation.x = BackLeftWheel.rotation.x
+	FrontLeftWheel.rotation.x = BackLeftWheel.rotation.x
+	FrontRightWheel.rotation.x = BackLeftWheel.rotation.x
+	
+	FrontLeftWheel.rotation.y = lerp(FrontLeftWheel.rotation.y, turn_force, 10 * delta)
+	FrontRightWheel.rotation.y = FrontLeftWheel.rotation.y
 	
 	# Smoke particle position and gravity
 	ParticleEmitter.rotation.y = lerp(ParticleEmitter.rotation.y, turn_force, delta)
@@ -99,7 +112,7 @@ func _process(delta):
 	var speed_factor = clamp(ball_speed / 70.0, 0.0, 1.0)
 	var target_fov = CAMERA_FOV_NORMAL
 	
-	if forward_direction.dot(Ball.linear_velocity.normalized()) < 0.0:
+	if forward_direction < 0:
 		target_fov = lerp(CAMERA_FOV_NORMAL, CAMERA_FOV_REVERSE, speed_factor)
 	elif is_boosting:
 		target_fov = CAMERA_FOV_BOOST
@@ -116,7 +129,7 @@ func _process(delta):
 			Input.action_release("Accelerate")
 	
 	# Show variables on screen
-	DebugLabel.text = "speed_force: " + str(speed_force) + "\n" + "ball_speed: " + str(ball_speed) + "\n" + "drift_boost_stage: " + str(drift_boost_stage)
+	DebugLabel.text = "speed_force: " + str(speed_force) + "\n" + "ball_speed: " + str(ball_speed) + "\n" + "drift_boost_stage: " + str(drift_boost_stage) + "\n" + "forward_direction: " + str(forward_direction)
 
 
 func turn(delta):
@@ -132,13 +145,15 @@ func start_drift():
 	is_drifting = true
 	drift_boost_stage = 0
 	drift_direction = turn_force
-	DriftTimer.start(1.0)
+	if DRIFT_STAGE_DELAY.has(drift_boost_stage):
+		DriftTimer.start(DRIFT_STAGE_DELAY[drift_boost_stage])
 
 
 func stop_drift():
 	if drift_boost_stage > 0:
 		is_boosting = true
-		BoostTimer.start(DRIFT_BOOST_DURATION[drift_boost_stage])
+		if DRIFT_BOOST_DURATION.has(drift_boost_stage):
+			BoostTimer.start(DRIFT_BOOST_DURATION[drift_boost_stage])
 	is_drifting = false
 	drift_boost_stage = 0
 	DriftTimer.stop()
@@ -147,6 +162,8 @@ func stop_drift():
 func _on_drift_timer_timeout():
 	if is_drifting:
 		drift_boost_stage += 1
+		if DRIFT_STAGE_DELAY.has(drift_boost_stage):
+			DriftTimer.start(DRIFT_STAGE_DELAY[drift_boost_stage])
 
 
 func _on_boost_timer_timeout():

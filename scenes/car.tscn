@@ -290,37 +290,37 @@ shape = SubResource("SphereShape3D_c35m8")
 [node name="Model" type="Node3D" parent="Car"]
 transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, -0.5, 0)
 
-[node name="body" type="MeshInstance3D" parent="Car/Model"]
+[node name="Body" type="MeshInstance3D" parent="Car/Model"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.15, -0.025)
 mesh = SubResource("ArrayMesh_qt2eu")
 skeleton = NodePath("")
 surface_material_override/0 = SubResource("StandardMaterial3D_50v30")
 
-[node name="spoiler" type="MeshInstance3D" parent="Car/Model/body"]
+[node name="Spoiler" type="MeshInstance3D" parent="Car/Model/Body"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, -1.04369)
 mesh = SubResource("ArrayMesh_jtldb")
 skeleton = NodePath("")
 surface_material_override/0 = SubResource("StandardMaterial3D_3mrxu")
 
-[node name="wheel-back-left" type="MeshInstance3D" parent="Car/Model"]
+[node name="BackLeftWheel" type="MeshInstance3D" parent="Car/Model"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.3, 0.3, -0.66)
 mesh = SubResource("ArrayMesh_cp117")
 skeleton = NodePath("")
 surface_material_override/0 = SubResource("StandardMaterial3D_4clw4")
 
-[node name="wheel-back-right" type="MeshInstance3D" parent="Car/Model"]
+[node name="BackRightWheel" type="MeshInstance3D" parent="Car/Model"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.3, 0.3, -0.66)
 mesh = SubResource("ArrayMesh_ctevm")
 skeleton = NodePath("")
 surface_material_override/0 = SubResource("StandardMaterial3D_uraa1")
 
-[node name="wheel-front-left" type="MeshInstance3D" parent="Car/Model"]
+[node name="FrontLeftWheel" type="MeshInstance3D" parent="Car/Model"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.3, 0.3, 0.66)
 mesh = SubResource("ArrayMesh_gm33m")
 skeleton = NodePath("")
 surface_material_override/0 = SubResource("StandardMaterial3D_ugdpj")
 
-[node name="wheel-front-right" type="MeshInstance3D" parent="Car/Model"]
+[node name="FrontRightWheel" type="MeshInstance3D" parent="Car/Model"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.3, 0.3, 0.66)
 mesh = SubResource("ArrayMesh_hylxu")
 skeleton = NodePath("")
@@ -328,7 +328,6 @@ surface_material_override/0 = SubResource("StandardMaterial3D_6mia2")
 
 [node name="Camera" type="Camera3D" parent="Car"]
 transform = Transform3D(1, 0, 0, 0, 0.984808, 0.173648, 0, -0.173648, 0.984808, 0, 2, 4)
-doppler_tracking = 1
 fov = 80.0
 
 [node name="ParticleEmitter" type="GPUParticles3D" parent="Car"]
@@ -341,6 +340,7 @@ draw_pass_1 = SubResource("QuadMesh_4clw4")
 
 [node name="DriftTimer" type="Timer" parent="."]
 wait_time = 2.0
+one_shot = true
 
 [node name="BoostTimer" type="Timer" parent="."]
 wait_time = 0.8
