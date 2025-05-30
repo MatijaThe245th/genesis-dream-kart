@@ -16,7 +16,7 @@ extends Node3D
 @onready var DebugLabel = $"../UI/HUD/DebugLabel"
 
 # Customizable parameters
-const ACCELERATION: float = 150.0
+const TOP_SPEED: float = 200.0
 const STEERING_STRENGTH: float = 15.0
 const TURN_SPEED: float = 5.0
 
@@ -25,12 +25,17 @@ const BODY_TILT_DRIFTING: float = 30.0
 const PARTICLE_OFFSET: float = 1.5
 
 const CAMERA_FOV_NORMAL: float = 80.0
-const CAMERA_FOV_MAX: float = 105.0
-const CAMERA_FOV_REVERSE: float = 60.0
-const CAMERA_FOV_BOOST: float = 110.0
+const CAMERA_FOV_MAX: float = 97.5
+const CAMERA_FOV_MIN: float = 65.0
+const CAMERA_FOV_BOOST: float = 105.0
+
+const CAMERA_DISTANCE_NORMAL: float = 4.0
+const CAMERA_DISTANCE_MAX: float = 3.25
+const CAMERA_DISTANCE_MIN: float = 4.5
+const CAMERA_DISTANCE_BOOST: float = 3.0
 
 const DRIFT_STRENGTH: float = 0.5
-const DRIFT_BOOST_SPEED: float = 200.0
+const DRIFT_BOOST_SPEED: float = 250.0
 const DRIFT_BOOST_DURATION: Dictionary = {
 	1: 0.8,
 	2: 1.3,
@@ -74,7 +79,7 @@ func _process(delta):
 	var acceleration_input = Input.get_action_strength("Accelerate") - Input.get_action_strength("Brake")
 	var steering_input = Input.get_action_strength("Left") - Input.get_action_strength("Right")
 	
-	speed_force = acceleration_input * ACCELERATION
+	speed_force = acceleration_input * TOP_SPEED
 	turn_force = deg_to_rad(STEERING_STRENGTH) * steering_input
 	
 	# Wheel model spin and rotation
@@ -92,7 +97,7 @@ func _process(delta):
 	ParticleEmitter.process_material.gravity.z = ball_speed / 10.0
 	
 	# Handle drifting
-	if Input.is_action_pressed("Drift") and not is_drifting and turn_force != 0 and speed_force > 0:
+	if Input.is_action_just_pressed("Drift") and not is_drifting and turn_force != 0 and acceleration_input > 0.5 and abs(steering_input) > 0.5:
 		start_drift()
 	
 	if is_drifting:
@@ -110,18 +115,28 @@ func _process(delta):
 	
 	drift_boost_stage = clamp(drift_boost_stage, 0, 3)
 	
-	# Handle camera FOV
-	var speed_factor = clamp(ball_speed / 70.0, 0.0, 1.0)
-	var target_fov = CAMERA_FOV_NORMAL
+	# Handle camera FOV and distance
+	var speed_factor: float = clamp(ball_speed / 70.0, 0.0, 1.0)
+	var target_fov: float = CAMERA_FOV_NORMAL
+	var target_camera_distance: float = CAMERA_DISTANCE_NORMAL
 	
 	if forward_direction < 0:
-		target_fov = lerp(CAMERA_FOV_NORMAL, CAMERA_FOV_REVERSE, speed_factor)
+		target_fov = lerp(CAMERA_FOV_NORMAL, CAMERA_FOV_MIN, speed_factor)
+		target_camera_distance = lerp(CAMERA_DISTANCE_NORMAL, CAMERA_DISTANCE_MIN, speed_factor)
 	elif is_boosting:
 		target_fov = CAMERA_FOV_BOOST
+		target_camera_distance = CAMERA_DISTANCE_BOOST
 	else:
 		target_fov = lerp(CAMERA_FOV_NORMAL, CAMERA_FOV_MAX, speed_factor)
+		target_camera_distance = lerp(CAMERA_DISTANCE_NORMAL, CAMERA_DISTANCE_MAX, speed_factor)
 	
-	Camera.fov = lerp(Camera.fov, target_fov, 10 * delta)
+	Camera.fov = lerp(Camera.fov, target_fov, 5 * delta)
+	Camera.position.z = lerp(Camera.position.z, target_camera_distance, 5 * delta)
+	
+	if is_drifting:
+		Camera.position.x = lerp(Camera.position.x, 3.0 * -drift_direction, 5 * delta)
+	else:
+		Camera.position.x = lerp(Camera.position.x, 0.0, 2.5 * delta)
 	
 	# Automatically accelerate on touch screen devices
 	if DisplayServer.is_touchscreen_available():
