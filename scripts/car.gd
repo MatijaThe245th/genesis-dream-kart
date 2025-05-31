@@ -34,6 +34,9 @@ const CAMERA_DISTANCE_MAX: float = 3.25
 const CAMERA_DISTANCE_MIN: float = 4.5
 const CAMERA_DISTANCE_BOOST: float = 3.0
 
+const CAMERA_OFFSET_NORMAL: float = 0.0
+const CAMERA_OFFSET_DRIFT: float = 5.0
+
 const DRIFT_STRENGTH: float = 0.5
 const DRIFT_BOOST_SPEED: float = 250.0
 const DRIFT_BOOST_DURATION: Dictionary = {
@@ -89,7 +92,7 @@ func _process(delta):
 	FrontLeftWheel.rotation.x = BackLeftWheel.rotation.x
 	FrontRightWheel.rotation.x = BackLeftWheel.rotation.x
 	
-	FrontLeftWheel.rotation.y = lerp(FrontLeftWheel.rotation.y, steering_input / 1.5, 10 * delta)
+	FrontLeftWheel.rotation.y = lerp(FrontLeftWheel.rotation.y, steering_input / 1.5 + CarBody.rotation.y, 10 * delta)
 	FrontRightWheel.rotation.y = FrontLeftWheel.rotation.y
 	
 	# Smoke particle position and gravity
@@ -97,7 +100,7 @@ func _process(delta):
 	ParticleEmitter.process_material.gravity.z = ball_speed / 10.0
 	
 	# Handle drifting
-	if Input.is_action_just_pressed("Drift") and not is_drifting and turn_force != 0 and acceleration_input > 0.5 and abs(steering_input) > 0.5:
+	if Input.is_action_pressed("Drift") and not is_drifting and turn_force != 0 and acceleration_input > 0.5 and abs(steering_input) > 0.5:
 		start_drift()
 	
 	if is_drifting:
@@ -134,9 +137,9 @@ func _process(delta):
 	Camera.position.z = lerp(Camera.position.z, target_camera_distance, 5 * delta)
 	
 	if is_drifting:
-		Camera.position.x = lerp(Camera.position.x, 3.0 * -drift_direction, 5 * delta)
+		Camera.position.x = lerp(Camera.position.x, CAMERA_OFFSET_DRIFT * -drift_direction, 2.5 * delta)
 	else:
-		Camera.position.x = lerp(Camera.position.x, 0.0, 2.5 * delta)
+		Camera.position.x = lerp(Camera.position.x, CAMERA_OFFSET_NORMAL, 2.5 * delta)
 	
 	# Automatically accelerate on touch screen devices
 	if DisplayServer.is_touchscreen_available():
@@ -161,6 +164,13 @@ func turn(delta):
 	BackRightWheel.position.x = lerp(BackRightWheel.position.x, -CarBody.rotation.y * 0.5 - 0.3, 50 * delta)
 	FrontLeftWheel.position.x = lerp(FrontLeftWheel.position.x, CarBody.rotation.y * 0.8 + 0.3, 50 * delta)
 	FrontRightWheel.position.x = lerp(FrontRightWheel.position.x, CarBody.rotation.y * 0.8 - 0.3, 50 * delta)
+	
+	if is_drifting:
+		FrontLeftWheel.position.z = lerp(FrontLeftWheel.position.z, 0.51, 50 * delta)
+		FrontRightWheel.position.z = lerp(FrontRightWheel.position.z, 0.51, 50 * delta)
+	else:
+		FrontLeftWheel.position.z = lerp(FrontLeftWheel.position.z, 0.66, 50 * delta)
+		FrontRightWheel.position.z = lerp(FrontRightWheel.position.z, 0.66, 50 * delta)
 	
 	BackLeftWheel.rotation.y = CarBody.rotation.y
 	BackRightWheel.rotation.y = CarBody.rotation.y
