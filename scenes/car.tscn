@@ -328,6 +328,7 @@ surface_material_override/0 = SubResource("StandardMaterial3D_6mia2")
 
 [node name="Camera" type="Camera3D" parent="Car"]
 transform = Transform3D(1, 0, 0, 0, 0.984808, 0.173648, 0, -0.173648, 0.984808, 0, 2, 4)
+v_offset = -0.5
 fov = 80.0
 
 [node name="ParticleEmitter" type="GPUParticles3D" parent="Car"]

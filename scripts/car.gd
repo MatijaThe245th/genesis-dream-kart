@@ -24,18 +24,18 @@ const BODY_TILT_NORMAL: float = 60.0
 const BODY_TILT_DRIFTING: float = 30.0
 const PARTICLE_OFFSET: float = 1.5
 
-const CAMERA_FOV_NORMAL: float = 80.0
-const CAMERA_FOV_MAX: float = 97.5
-const CAMERA_FOV_MIN: float = 65.0
-const CAMERA_FOV_BOOST: float = 105.0
+const CAMERA_FOV_NORMAL: float = 70.0
+const CAMERA_FOV_MAX: float = 87.5
+const CAMERA_FOV_MIN: float = 55.0
+const CAMERA_FOV_BOOST: float = 95.0
 
 const CAMERA_DISTANCE_NORMAL: float = 4.0
 const CAMERA_DISTANCE_MAX: float = 3.25
 const CAMERA_DISTANCE_MIN: float = 4.5
 const CAMERA_DISTANCE_BOOST: float = 3.0
 
-const CAMERA_OFFSET_NORMAL: float = 0.0
-const CAMERA_OFFSET_DRIFT: float = 5.0
+const CAMERA_OFFSET_NORMAL: float = 5.0
+const CAMERA_OFFSET_DRIFT: float = 10.0
 
 const DRIFT_STRENGTH: float = 0.5
 const DRIFT_BOOST_SPEED: float = 250.0
@@ -83,7 +83,7 @@ func _process(delta):
 	var steering_input = Input.get_action_strength("Left") - Input.get_action_strength("Right")
 	
 	speed_force = acceleration_input * TOP_SPEED
-	turn_force = deg_to_rad(STEERING_STRENGTH) * steering_input
+	turn_force = lerp(turn_force, deg_to_rad(STEERING_STRENGTH) * steering_input, 10 * delta)
 	
 	# Wheel model spin and rotation
 	WheelSpinReference.rotate_x(ball_speed * forward_direction * delta)
@@ -137,9 +137,11 @@ func _process(delta):
 	Camera.position.z = lerp(Camera.position.z, target_camera_distance, 5 * delta)
 	
 	if is_drifting:
-		Camera.position.x = lerp(Camera.position.x, CAMERA_OFFSET_DRIFT * -drift_direction, 2.5 * delta)
+		Camera.h_offset = lerp(Camera.h_offset, CAMERA_OFFSET_DRIFT * -drift_direction, 2.5 * delta)
+	elif turn_force != 0.0:
+		Camera.h_offset = lerp(Camera.h_offset, CAMERA_OFFSET_NORMAL * -turn_force, 2.5 * delta)
 	else:
-		Camera.position.x = lerp(Camera.position.x, CAMERA_OFFSET_NORMAL, 2.5 * delta)
+		Camera.h_offset = lerp(Camera.h_offset, 0.0, 2.5 * delta)
 	
 	# Automatically accelerate on touch screen devices
 	if DisplayServer.is_touchscreen_available():

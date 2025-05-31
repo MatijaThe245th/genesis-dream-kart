@@ -10,7 +10,7 @@ config_version=5
 
 [application]
 
-config/name="Genesis Dream Kart"
+config/name="Genesis Dream Racers"
 run/main_scene="uid://c3brva72gh781"
 config/quit_on_go_back=false
 config/features=PackedStringArray("4.4", "Mobile")
