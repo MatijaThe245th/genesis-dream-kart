@@ -658,6 +658,7 @@ grow_horizontal = 2
 grow_vertical = 0
 
 [node name="Left" type="TouchScreenButton" parent="UI/TouchControls"]
+self_modulate = Color(1, 1, 1, 0.5)
 position = Vector2(-575, -230)
 scale = Vector2(0.075, 0.075)
 texture_normal = ExtResource("27_8hhwm")
@@ -668,6 +669,7 @@ action = "Left"
 visibility_mode = 1
 
 [node name="Right" type="TouchScreenButton" parent="UI/TouchControls"]
+self_modulate = Color(1, 1, 1, 0.5)
 position = Vector2(-375, -230)
 scale = Vector2(0.075, 0.075)
 texture_normal = ExtResource("29_fh2s8")
@@ -678,6 +680,7 @@ action = "Right"
 visibility_mode = 1
 
 [node name="Brake" type="TouchScreenButton" parent="UI/TouchControls"]
+self_modulate = Color(1, 1, 1, 0.5)
 position = Vector2(420, -230)
 scale = Vector2(0.075, 0.075)
 texture_normal = ExtResource("31_6vkq6")
@@ -688,6 +691,7 @@ action = "Brake"
 visibility_mode = 1
 
 [node name="Drift" type="TouchScreenButton" parent="UI/TouchControls"]
+self_modulate = Color(1, 1, 1, 0.5)
 position = Vector2(220, -230)
 scale = Vector2(0.075, 0.075)
 texture_normal = ExtResource("33_nrqcm")

@@ -32,10 +32,10 @@ const CAMERA_FOV_BOOST: float = 95.0
 const CAMERA_DISTANCE_NORMAL: float = 4.0
 const CAMERA_DISTANCE_MAX: float = 3.25
 const CAMERA_DISTANCE_MIN: float = 4.5
-const CAMERA_DISTANCE_BOOST: float = 3.0
+const CAMERA_DISTANCE_BOOST: float = 4.0
 
-const CAMERA_OFFSET_NORMAL: float = 5.0
-const CAMERA_OFFSET_DRIFT: float = 10.0
+const CAMERA_OFFSET_NORMAL: float = 3.0
+const CAMERA_OFFSET_DRIFT: float = 5.0
 
 const DRIFT_STRENGTH: float = 0.5
 const DRIFT_BOOST_SPEED: float = 250.0
@@ -84,6 +84,7 @@ func _process(delta):
 	
 	speed_force = acceleration_input * TOP_SPEED
 	turn_force = lerp(turn_force, deg_to_rad(STEERING_STRENGTH) * steering_input, 10 * delta)
+	turn_force = clamp(turn_force, -0.25, 0.25)
 	
 	# Wheel model spin and rotation
 	WheelSpinReference.rotate_x(ball_speed * forward_direction * delta)
@@ -100,12 +101,20 @@ func _process(delta):
 	ParticleEmitter.process_material.gravity.z = ball_speed / 10.0
 	
 	# Handle drifting
-	if Input.is_action_pressed("Drift") and not is_drifting and turn_force != 0 and acceleration_input > 0.5 and abs(steering_input) > 0.5:
+	if Input.is_action_pressed("Drift") and not is_drifting and acceleration_input > 0.5 and abs(steering_input) > 0.5:
+		if steering_input > 0.0:
+			turn_force = 0.25
+		else:
+			turn_force = -0.25
 		start_drift()
 	
 	if is_drifting:
 		var drift_amount = deg_to_rad(STEERING_STRENGTH * DRIFT_STRENGTH) * steering_input
 		turn_force = drift_direction + drift_amount
+		if drift_direction > 0.0:
+			turn_force = clamp(turn_force, 0.15, 0.35)
+		else:
+			turn_force = clamp(turn_force, -0.35, -0.15)
 		body_tilt = BODY_TILT_DRIFTING
 	else:
 		body_tilt = BODY_TILT_NORMAL
@@ -151,7 +160,7 @@ func _process(delta):
 			Input.action_release("Accelerate")
 	
 	# Show variables on screen
-	DebugLabel.text = "speed_force: " + str(speed_force) + "\n" + "ball_speed: " + str(ball_speed) + "\n" + "drift_boost_stage: " + str(drift_boost_stage) + "\n" + "forward_direction: " + str(forward_direction)
+	DebugLabel.text = "speed_force: " + str(speed_force) + "\n" + "turn_force: " + str(turn_force) + "\n" + "ball_speed: " + str(ball_speed) + "\n" + "drift_boost_stage: " + str(drift_boost_stage) + "\n" + "forward_direction: " + str(forward_direction) + "\n" + "acceleration_input: " + str(acceleration_input) + "\n" + "steering_input: " + str(steering_input)
 
 
 func turn(delta):
@@ -160,6 +169,7 @@ func turn(delta):
 	Car.global_transform = Car.global_transform.orthonormalized()
 	
 	CarBody.rotation.y = lerp(CarBody.rotation.y, turn_force * ball_speed / body_tilt, 10 * delta)
+	CarBody.rotation.y = clamp(CarBody.rotation.y, -0.60, 0.60)
 	
 	# Fix wheel model positions
 	BackLeftWheel.position.x = lerp(BackLeftWheel.position.x, -CarBody.rotation.y * 0.5 + 0.3, 50 * delta)
@@ -167,15 +177,15 @@ func turn(delta):
 	FrontLeftWheel.position.x = lerp(FrontLeftWheel.position.x, CarBody.rotation.y * 0.8 + 0.3, 50 * delta)
 	FrontRightWheel.position.x = lerp(FrontRightWheel.position.x, CarBody.rotation.y * 0.8 - 0.3, 50 * delta)
 	
+	BackLeftWheel.rotation.y = CarBody.rotation.y
+	BackRightWheel.rotation.y = CarBody.rotation.y
+	
 	if is_drifting:
 		FrontLeftWheel.position.z = lerp(FrontLeftWheel.position.z, 0.51, 50 * delta)
 		FrontRightWheel.position.z = lerp(FrontRightWheel.position.z, 0.51, 50 * delta)
 	else:
 		FrontLeftWheel.position.z = lerp(FrontLeftWheel.position.z, 0.66, 50 * delta)
 		FrontRightWheel.position.z = lerp(FrontRightWheel.position.z, 0.66, 50 * delta)
-	
-	BackLeftWheel.rotation.y = CarBody.rotation.y
-	BackRightWheel.rotation.y = CarBody.rotation.y
 	
 	# Fix particle emitter position
 	ParticleEmitter.position.x = lerp(ParticleEmitter.position.x, (turn_force * ball_speed / body_tilt) * PARTICLE_OFFSET, 5 * delta)
