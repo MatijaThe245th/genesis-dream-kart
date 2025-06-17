@@ -37,6 +37,8 @@ const CAMERA_DISTANCE_BOOST: float = 4.0
 const CAMERA_OFFSET_NORMAL: float = 3.0
 const CAMERA_OFFSET_DRIFT: float = 5.0
 
+const CAMERA_ROTATION_DRIFT: float = 0.75
+
 const DRIFT_STRENGTH: float = 0.5
 const DRIFT_BOOST_SPEED: float = 250.0
 const DRIFT_BOOST_DURATION: Dictionary = {
@@ -147,10 +149,13 @@ func _process(delta):
 	
 	if is_drifting:
 		Camera.h_offset = lerp(Camera.h_offset, CAMERA_OFFSET_DRIFT * -drift_direction, 2.5 * delta)
+		Camera.rotation.z = lerp(Camera.rotation.z, CAMERA_ROTATION_DRIFT * -drift_direction, 2.5 * delta)
 	elif turn_force != 0.0:
-		Camera.h_offset = lerp(Camera.h_offset, CAMERA_OFFSET_NORMAL * -turn_force, 2.5 * delta)
+		Camera.h_offset = lerp(Camera.h_offset, CAMERA_OFFSET_NORMAL * -turn_force * abs(acceleration_input), 2.5 * delta)
+		Camera.rotation.z = lerp(Camera.rotation.z, 0.25 * -turn_force * abs(acceleration_input), 2.5 * delta)
 	else:
 		Camera.h_offset = lerp(Camera.h_offset, 0.0, 2.5 * delta)
+		Camera.rotation.z = lerp(Camera.rotation.z, 0.0, 2.5 * delta)
 	
 	# Automatically accelerate on touch screen devices
 	if DisplayServer.is_touchscreen_available():

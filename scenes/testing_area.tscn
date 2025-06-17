@@ -58,7 +58,7 @@ material = SubResource("StandardMaterial3D_dkpym")
 size = Vector3(500, 0.5, 500)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_rttje"]
-size = Vector3(500, 0.5, 500)
+size = Vector3(500, 30.87, 500)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_xngxu"]
 resource_name = "lambert238"
@@ -605,6 +605,7 @@ directional_shadow_blend_splits = true
 mesh = SubResource("BoxMesh_rttje")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Ground"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -15.185, 0)
 shape = SubResource("BoxShape3D_rttje")
 
 [node name="Car" parent="." instance=ExtResource("1_mb3qh")]
