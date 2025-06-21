@@ -7,8 +7,8 @@ extends Node3D
 @onready var BackRightWheel = $"Car/Model/BackRightWheel"
 @onready var FrontLeftWheel = $"Car/Model/FrontLeftWheel"
 @onready var FrontRightWheel = $"Car/Model/FrontRightWheel"
-@onready var WheelSpinReference = $WheelSpinReference
-@onready var CarBody = $Car/Model/Body
+@onready var WheelSpinReference = $Car/WheelSpinReference
+@onready var CarModel = $Car/Model
 @onready var DriftTimer = $"DriftTimer"
 @onready var BoostTimer = $"BoostTimer"
 @onready var Camera = $Car/Camera
@@ -17,11 +17,11 @@ extends Node3D
 
 # Customizable parameters
 const TOP_SPEED: float = 200.0
-const STEERING_STRENGTH: float = 15.0
+const STEERING_STRENGTH: float = 20.0
 const TURN_SPEED: float = 5.0
 
-const BODY_TILT_NORMAL: float = 60.0
-const BODY_TILT_DRIFTING: float = 30.0
+const BODY_TILT_NORMAL: float = 55.0
+const BODY_TILT_DRIFTING: float = 25.0
 const PARTICLE_OFFSET: float = 1.5
 
 const CAMERA_FOV_NORMAL: float = 70.0
@@ -37,7 +37,7 @@ const CAMERA_DISTANCE_BOOST: float = 4.0
 const CAMERA_OFFSET_NORMAL: float = 3.0
 const CAMERA_OFFSET_DRIFT: float = 5.0
 
-const CAMERA_ROTATION_DRIFT: float = 0.75
+const CAMERA_ROTATION_DRIFT: float = 0.5
 
 const DRIFT_STRENGTH: float = 0.5
 const DRIFT_BOOST_SPEED: float = 250.0
@@ -57,6 +57,8 @@ var is_drifting: bool = false
 var is_boosting: bool = false
 
 # Dynamic variables
+var acceleration_input: float
+var steering_input: float
 var forward_direction: int = 0
 var ball_speed: float = 0.0
 var speed_force: float = 0.0
@@ -64,6 +66,14 @@ var turn_force: float = 0.0
 var body_tilt: float = 0.0
 var drift_direction: float = 0.0
 var drift_boost_stage: int = 0
+
+
+func _ready():
+	CarModel.rotation_degrees.y = 180
+	Camera.fov = CAMERA_FOV_NORMAL
+	Camera.position.z = CAMERA_DISTANCE_NORMAL
+	Camera.rotation.z = 0.0
+	WheelSpinReference.rotation.x = 0.0
 
 
 func _physics_process(_delta):
@@ -81,21 +91,23 @@ func _process(delta):
 	forward_direction = round(-Car.global_transform.basis.z.normalized().dot(Ball.linear_velocity.normalized()))
 	
 	# Handle basic movement
-	var acceleration_input = Input.get_action_strength("Accelerate") - Input.get_action_strength("Brake")
-	var steering_input = Input.get_action_strength("Left") - Input.get_action_strength("Right")
+	acceleration_input = Input.get_action_strength("Accelerate") - Input.get_action_strength("Brake")
+	steering_input = Input.get_action_strength("Left") - Input.get_action_strength("Right")
 	
 	speed_force = acceleration_input * TOP_SPEED
 	turn_force = lerp(turn_force, deg_to_rad(STEERING_STRENGTH) * steering_input, 10 * delta)
+	speed_force = clamp(speed_force, -150.0, 200.0)
 	turn_force = clamp(turn_force, -0.25, 0.25)
 	
-	# Wheel model spin and rotation
+	# Wheel spin
 	WheelSpinReference.rotate_x(ball_speed * forward_direction * delta)
 	BackLeftWheel.rotation.x = WheelSpinReference.rotation.x
 	BackRightWheel.rotation.x = BackLeftWheel.rotation.x
 	FrontLeftWheel.rotation.x = BackLeftWheel.rotation.x
 	FrontRightWheel.rotation.x = BackLeftWheel.rotation.x
 	
-	FrontLeftWheel.rotation.y = lerp(FrontLeftWheel.rotation.y, steering_input / 1.5 + CarBody.rotation.y, 10 * delta)
+	# Front wheel rotation
+	FrontLeftWheel.rotation.y = lerp(FrontLeftWheel.rotation.y, steering_input / 2, 10 * delta)
 	FrontRightWheel.rotation.y = FrontLeftWheel.rotation.y
 	
 	# Smoke particle position and gravity
@@ -152,7 +164,7 @@ func _process(delta):
 		Camera.rotation.z = lerp(Camera.rotation.z, CAMERA_ROTATION_DRIFT * -drift_direction, 2.5 * delta)
 	elif turn_force != 0.0:
 		Camera.h_offset = lerp(Camera.h_offset, CAMERA_OFFSET_NORMAL * -turn_force * abs(acceleration_input), 2.5 * delta)
-		Camera.rotation.z = lerp(Camera.rotation.z, 0.25 * -turn_force * abs(acceleration_input), 2.5 * delta)
+		Camera.rotation.z = lerp(Camera.rotation.z, 0.0, 2.5 * delta)
 	else:
 		Camera.h_offset = lerp(Camera.h_offset, 0.0, 2.5 * delta)
 		Camera.rotation.z = lerp(Camera.rotation.z, 0.0, 2.5 * delta)
@@ -173,24 +185,8 @@ func turn(delta):
 	Car.global_transform.basis = Car.global_transform.basis.slerp(new_basis, TURN_SPEED * delta)
 	Car.global_transform = Car.global_transform.orthonormalized()
 	
-	CarBody.rotation.y = lerp(CarBody.rotation.y, turn_force * ball_speed / body_tilt, 10 * delta)
-	CarBody.rotation.y = clamp(CarBody.rotation.y, -0.60, 0.60)
-	
-	# Fix wheel model positions
-	BackLeftWheel.position.x = lerp(BackLeftWheel.position.x, -CarBody.rotation.y * 0.5 + 0.3, 50 * delta)
-	BackRightWheel.position.x = lerp(BackRightWheel.position.x, -CarBody.rotation.y * 0.5 - 0.3, 50 * delta)
-	FrontLeftWheel.position.x = lerp(FrontLeftWheel.position.x, CarBody.rotation.y * 0.8 + 0.3, 50 * delta)
-	FrontRightWheel.position.x = lerp(FrontRightWheel.position.x, CarBody.rotation.y * 0.8 - 0.3, 50 * delta)
-	
-	BackLeftWheel.rotation.y = CarBody.rotation.y
-	BackRightWheel.rotation.y = CarBody.rotation.y
-	
-	if is_drifting:
-		FrontLeftWheel.position.z = lerp(FrontLeftWheel.position.z, 0.51, 50 * delta)
-		FrontRightWheel.position.z = lerp(FrontRightWheel.position.z, 0.51, 50 * delta)
-	else:
-		FrontLeftWheel.position.z = lerp(FrontLeftWheel.position.z, 0.66, 50 * delta)
-		FrontRightWheel.position.z = lerp(FrontRightWheel.position.z, 0.66, 50 * delta)
+	# Rotate car when turning
+	CarModel.rotation.y = lerp(CarModel.rotation.y, deg_to_rad(180) + (turn_force * ball_speed / body_tilt), 10 * delta)
 	
 	# Fix particle emitter position
 	ParticleEmitter.position.x = lerp(ParticleEmitter.position.x, (turn_force * ball_speed / body_tilt) * PARTICLE_OFFSET, 5 * delta)
