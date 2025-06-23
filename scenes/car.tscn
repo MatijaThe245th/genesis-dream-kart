@@ -5,7 +5,6 @@
 [ext_resource type="Texture2D" uid="uid://h5erhcid1uu5" path="res://models/smoke_07.png" id="3_50v30"]
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_b0jew"]
-bounce = 0.1
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_c35m8"]
 

@@ -17,11 +17,11 @@ extends Node3D
 
 # Customizable parameters
 const TOP_SPEED: float = 200.0
-const STEERING_STRENGTH: float = 20.0
-const TURN_SPEED: float = 5.0
+const STEERING_STRENGTH: float = 12.5
+const TURN_SPEED: float = 7.5
 
-const BODY_TILT_NORMAL: float = 55.0
-const BODY_TILT_DRIFTING: float = 25.0
+const BODY_TILT_NORMAL: float = 50.0
+const BODY_TILT_DRIFT: float = 10.0
 const PARTICLE_OFFSET: float = 1.5
 
 const CAMERA_FOV_NORMAL: float = 70.0
@@ -117,19 +117,19 @@ func _process(delta):
 	# Handle drifting
 	if Input.is_action_pressed("Drift") and not is_drifting and acceleration_input > 0.5 and abs(steering_input) > 0.5:
 		if steering_input > 0.0:
-			turn_force = 0.25
+			turn_force = 0.13
 		else:
-			turn_force = -0.25
+			turn_force = -0.13
 		start_drift()
 	
 	if is_drifting:
 		var drift_amount = deg_to_rad(STEERING_STRENGTH * DRIFT_STRENGTH) * steering_input
 		turn_force = drift_direction + drift_amount
 		if drift_direction > 0.0:
-			turn_force = clamp(turn_force, 0.15, 0.35)
+			turn_force = clamp(turn_force, 0.075, 0.2)
 		else:
-			turn_force = clamp(turn_force, -0.35, -0.15)
-		body_tilt = BODY_TILT_DRIFTING
+			turn_force = clamp(turn_force, -0.2, -0.075)
+		body_tilt = BODY_TILT_DRIFT
 	else:
 		body_tilt = BODY_TILT_NORMAL
 	
@@ -138,6 +138,9 @@ func _process(delta):
 	
 	if ball_speed > 0.75:
 		turn(delta)
+	
+	if ball_speed < 20.0:
+		is_drifting = false
 	
 	drift_boost_stage = clamp(drift_boost_stage, 0, 3)
 	
@@ -161,13 +164,13 @@ func _process(delta):
 	
 	if is_drifting:
 		Camera.h_offset = lerp(Camera.h_offset, CAMERA_OFFSET_DRIFT * -drift_direction, 2.5 * delta)
-		Camera.rotation.z = lerp(Camera.rotation.z, CAMERA_ROTATION_DRIFT * -drift_direction, 2.5 * delta)
+		#Camera.rotation.z = lerp(Camera.rotation.z, CAMERA_ROTATION_DRIFT * -drift_direction, 2.5 * delta)
 	elif turn_force != 0.0:
 		Camera.h_offset = lerp(Camera.h_offset, CAMERA_OFFSET_NORMAL * -turn_force * abs(acceleration_input), 2.5 * delta)
-		Camera.rotation.z = lerp(Camera.rotation.z, 0.0, 2.5 * delta)
+		#Camera.rotation.z = lerp(Camera.rotation.z, 0.0, 2.5 * delta)
 	else:
 		Camera.h_offset = lerp(Camera.h_offset, 0.0, 2.5 * delta)
-		Camera.rotation.z = lerp(Camera.rotation.z, 0.0, 2.5 * delta)
+		#Camera.rotation.z = lerp(Camera.rotation.z, 0.0, 2.5 * delta)
 	
 	# Automatically accelerate on touch screen devices
 	if DisplayServer.is_touchscreen_available():
@@ -187,6 +190,7 @@ func turn(delta):
 	
 	# Rotate car when turning
 	CarModel.rotation.y = lerp(CarModel.rotation.y, deg_to_rad(180) + (turn_force * ball_speed / body_tilt), 10 * delta)
+
 	
 	# Fix particle emitter position
 	ParticleEmitter.position.x = lerp(ParticleEmitter.position.x, (turn_force * ball_speed / body_tilt) * PARTICLE_OFFSET, 5 * delta)
