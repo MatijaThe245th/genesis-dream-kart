@@ -20,6 +20,9 @@ const TOP_SPEED: float = 200.0
 const STEERING_STRENGTH: float = 12.5
 const TURN_SPEED: float = 7.5
 
+const DRIFT_FORCE_MIN: float = 0.08
+const DRIFT_FORCE_MAX: float = 0.225
+
 const BODY_TILT_NORMAL: float = 1.0
 const BODY_TILT_DRIFT: float = 0.2
 const PARTICLE_OFFSET: float = 1.5
@@ -95,7 +98,7 @@ func _process(delta):
 	speed_force = acceleration_input * TOP_SPEED
 	turn_force = lerp(turn_force, deg_to_rad(STEERING_STRENGTH) * steering_input, 10 * delta)
 	speed_force = clamp(speed_force, -150.0, 200.0)
-	turn_force = clamp(turn_force, -0.25, 0.25)
+	turn_force = clamp(turn_force, -0.2, 0.2)
 	
 	# Wheel spin
 	WheelSpinReference.rotate_x(ball_speed * forward_direction * delta)
@@ -113,20 +116,21 @@ func _process(delta):
 	ParticleEmitter.process_material.gravity.z = ball_speed / 10.0
 	
 	# Handle drifting
-	if Input.is_action_pressed("Drift") and not is_drifting and acceleration_input > 0.5 and abs(steering_input) > 0.5:
+	if Input.is_action_pressed("Drift") and not is_drifting and acceleration_input > 0.5 and abs(steering_input) > 0.5 and ball_speed > 20.0:
+		var drift_force_average: float = (DRIFT_FORCE_MIN + DRIFT_FORCE_MAX) / 2
 		if steering_input > 0.0:
-			turn_force = 0.14
+			turn_force = drift_force_average
 		else:
-			turn_force = -0.14
+			turn_force = -drift_force_average
 		start_drift()
 	
 	if is_drifting:
-		var drift_amount = deg_to_rad(STEERING_STRENGTH * DRIFT_STRENGTH) * steering_input
+		var drift_amount: float = deg_to_rad(STEERING_STRENGTH * DRIFT_STRENGTH) * steering_input
 		turn_force = drift_direction + drift_amount
 		if drift_direction > 0.0:
-			turn_force = clamp(turn_force, 0.08, 0.2)
+			turn_force = clamp(turn_force, DRIFT_FORCE_MIN, DRIFT_FORCE_MAX)
 		else:
-			turn_force = clamp(turn_force, -0.2, -0.08)
+			turn_force = clamp(turn_force, -DRIFT_FORCE_MAX, -DRIFT_FORCE_MIN)
 		body_tilt = BODY_TILT_DRIFT
 	else:
 		body_tilt = BODY_TILT_NORMAL
@@ -185,7 +189,7 @@ func turn(delta):
 	
 	# Rotate car when turning
 	CarModel.rotation.y = lerp(CarModel.rotation.y, PI + (turn_force / body_tilt), 10 * delta)
-	CarModel.rotation.y = clamp(CarModel.rotation.y, PI + -1, PI + 1)
+	CarModel.rotation.y = clamp(CarModel.rotation.y, PI + -2, PI + 2)
 	
 	# Fix particle emitter position
 	ParticleEmitter.position.x = lerp(ParticleEmitter.position.x, (turn_force / body_tilt) * PARTICLE_OFFSET, 5 * delta)

@@ -278,6 +278,7 @@ script = ExtResource("1_qt2eu")
 [node name="Ball" type="RigidBody3D" parent="."]
 physics_material_override = SubResource("PhysicsMaterial_b0jew")
 gravity_scale = 10.0
+continuous_cd = true
 linear_damp = 2.0
 angular_damp = 5.0
 
