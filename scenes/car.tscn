@@ -339,6 +339,9 @@ draw_pass_1 = SubResource("QuadMesh_4clw4")
 
 [node name="WheelSpinReference" type="Node3D" parent="Car"]
 
+[node name="RayCast" type="RayCast3D" parent="Car"]
+target_position = Vector3(0, -2, 0)
+
 [node name="DriftTimer" type="Timer" parent="."]
 wait_time = 2.0
 one_shot = true

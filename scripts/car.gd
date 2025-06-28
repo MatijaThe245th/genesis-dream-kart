@@ -14,14 +14,15 @@ extends Node3D
 @onready var Camera = $Car/Camera
 @onready var ParticleEmitter = $"Car/ParticleEmitter"
 @onready var DebugLabel = $"../UI/HUD/DebugLabel"
+@onready var RayCast = $Car/RayCast
 
 # Customizable parameters
 const TOP_SPEED: float = 200.0
 const STEERING_STRENGTH: float = 12.5
 const TURN_SPEED: float = 7.5
 
-const DRIFT_FORCE_MIN: float = 0.08
-const DRIFT_FORCE_MAX: float = 0.225
+const DRIFT_FORCE_MIN: float = 0.09
+const DRIFT_FORCE_MAX: float = 0.23
 
 const BODY_TILT_NORMAL: float = 1.0
 const BODY_TILT_DRIFT: float = 0.2
@@ -67,6 +68,7 @@ var turn_force: float = 0.0
 var body_tilt: float = 0.0
 var drift_direction: float = 0.0
 var drift_boost_stage: int = 0
+var ground_normal: Vector3 = Vector3.UP
 
 
 func _ready():
@@ -75,16 +77,34 @@ func _ready():
 	Camera.position.z = CAMERA_DISTANCE_NORMAL
 	Camera.rotation.z = 0.0
 	WheelSpinReference.rotation.x = 0.0
+	ground_normal = Vector3.UP
 
 
-func _physics_process(_delta):
+func _physics_process(delta):
 	# Attach car model to ball
 	Car.transform.origin = Ball.transform.origin
 	
-	if not is_boosting:
-		Ball.apply_central_force(-Car.global_transform.basis.z.normalized() * speed_force)
+	if RayCast.is_colliding():
+		ground_normal = RayCast.get_collision_normal().normalized()
 	else:
-		Ball.apply_central_force(-Car.global_transform.basis.z.normalized() * DRIFT_BOOST_SPEED)
+		ground_normal = Vector3.UP
+	
+	# Smoothly align car's up direction with the surface normal
+	var rotation_axis = Car.global_transform.basis.y.cross(ground_normal).normalized()
+	var angle = acos(clamp(Car.global_transform.basis.y.dot(ground_normal), -1.0, 1.0))
+	if angle > 0.01:
+		var new_rotation = Quaternion(rotation_axis, angle * delta * 5.0)
+		Car.transform.basis = Basis(new_rotation) * Car.transform.basis
+		Car.transform = Car.transform.orthonormalized()
+	
+	# Calculate forward tangent along surface
+	var forward_tangent = (-Car.global_transform.basis.z - ground_normal * -Car.global_transform.basis.z.dot(ground_normal)).normalized()
+	
+	# Apply driving force
+	if not is_boosting:
+		Ball.apply_central_force(forward_tangent * speed_force)
+	else:
+		Ball.apply_central_force(forward_tangent * DRIFT_BOOST_SPEED)
 
 
 func _process(delta):
@@ -183,7 +203,7 @@ func _process(delta):
 
 
 func turn(delta):
-	var new_basis = Car.global_transform.basis.rotated(Car.global_transform.basis.y, turn_force)
+	var new_basis = Car.global_transform.basis.rotated(ground_normal, turn_force)
 	Car.global_transform.basis = Car.global_transform.basis.slerp(new_basis, TURN_SPEED * delta)
 	Car.global_transform = Car.global_transform.orthonormalized()
 	
