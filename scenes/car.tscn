@@ -1,8 +1,10 @@
-[gd_scene load_steps=32 format=4 uid="uid://io7b4jh3ku2v"]
+[gd_scene load_steps=34 format=4 uid="uid://io7b4jh3ku2v"]
 
 [ext_resource type="Texture2D" uid="uid://ba8qwbkow6gvc" path="res://models/colormap.png" id="1_c35m8"]
 [ext_resource type="Script" uid="uid://c4ts2lchf6o8u" path="res://scripts/car.gd" id="1_qt2eu"]
+[ext_resource type="Script" uid="uid://dc1i15tvsfyge" path="res://scripts/car_model.gd" id="2_3mrxu"]
 [ext_resource type="Texture2D" uid="uid://h5erhcid1uu5" path="res://models/smoke_07.png" id="3_50v30"]
+[ext_resource type="Script" uid="uid://1lac1txlddh6" path="res://scripts/camera.gd" id="3_jtldb"]
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_b0jew"]
 
@@ -289,6 +291,7 @@ shape = SubResource("SphereShape3D_c35m8")
 
 [node name="Model" type="Node3D" parent="Car"]
 transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, -0.5, 0)
+script = ExtResource("2_3mrxu")
 
 [node name="Body" type="MeshInstance3D" parent="Car/Model"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.15, -0.025)
@@ -328,6 +331,7 @@ surface_material_override/0 = SubResource("StandardMaterial3D_6mia2")
 
 [node name="Camera" type="Camera3D" parent="Car"]
 transform = Transform3D(1, 0, 0, 0, 0.984808, 0.173648, 0, -0.173648, 0.984808, 0, 1.5, 4)
+script = ExtResource("3_jtldb")
 
 [node name="ParticleEmitter" type="GPUParticles3D" parent="Car"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.2, 1.5)
@@ -340,7 +344,7 @@ draw_pass_1 = SubResource("QuadMesh_4clw4")
 [node name="WheelSpinReference" type="Node3D" parent="Car"]
 
 [node name="RayCast" type="RayCast3D" parent="Car"]
-target_position = Vector3(0, -2, 0)
+target_position = Vector3(0, -1.5, 0)
 
 [node name="DriftTimer" type="Timer" parent="."]
 wait_time = 2.0

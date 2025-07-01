@@ -3,43 +3,19 @@ extends Node3D
 # Nodes
 @onready var Ball = $Ball
 @onready var Car = $Car
-@onready var BackLeftWheel = $"Car/Model/BackLeftWheel"
-@onready var BackRightWheel = $"Car/Model/BackRightWheel"
-@onready var FrontLeftWheel = $"Car/Model/FrontLeftWheel"
-@onready var FrontRightWheel = $"Car/Model/FrontRightWheel"
-@onready var WheelSpinReference = $Car/WheelSpinReference
-@onready var CarModel = $Car/Model
 @onready var DriftTimer = $"DriftTimer"
 @onready var BoostTimer = $"BoostTimer"
-@onready var Camera = $Car/Camera
-@onready var ParticleEmitter = $"Car/ParticleEmitter"
-@onready var DebugLabel = $"../UI/HUD/DebugLabel"
 @onready var RayCast = $Car/RayCast
 
 # Customizable parameters
 const TOP_SPEED: float = 200.0
+const MIN_SPEED: float = -150.0
+const ACCELERATION: float = 5.0
 const STEERING_STRENGTH: float = 12.5
 const TURN_SPEED: float = 7.5
 
-const DRIFT_FORCE_MIN: float = 0.09
-const DRIFT_FORCE_MAX: float = 0.23
-
-const BODY_TILT_NORMAL: float = 1.0
-const BODY_TILT_DRIFT: float = 0.2
-const PARTICLE_OFFSET: float = 1.5
-
-const CAMERA_FOV_NORMAL: float = 70.0
-const CAMERA_FOV_MAX: float = 87.5
-const CAMERA_FOV_MIN: float = 55.0
-const CAMERA_FOV_BOOST: float = 95.0
-
-const CAMERA_DISTANCE_NORMAL: float = 4.0
-const CAMERA_DISTANCE_MAX: float = 3.75
-const CAMERA_DISTANCE_MIN: float = 4.0
-const CAMERA_DISTANCE_BOOST: float = 4.25
-
-const CAMERA_OFFSET_NORMAL: float = 3.0
-const CAMERA_OFFSET_DRIFT: float = 5.0
+const DRIFT_FORCE_MIN: float = 0.1
+const DRIFT_FORCE_MAX: float = 0.25
 
 const DRIFT_STRENGTH: float = 0.5
 const DRIFT_BOOST_SPEED: float = 250.0
@@ -65,79 +41,42 @@ var forward_direction: int = 0
 var ball_speed: float = 0.0
 var speed_force: float = 0.0
 var turn_force: float = 0.0
-var body_tilt: float = 0.0
 var drift_direction: float = 0.0
 var drift_boost_stage: int = 0
-var ground_normal: Vector3 = Vector3.UP
+var ground_normal: Vector3
+var new_transform: Transform3D
 
 
-func _ready():
-	CarModel.rotation_degrees.y = 180
-	Camera.fov = CAMERA_FOV_NORMAL
-	Camera.position.z = CAMERA_DISTANCE_NORMAL
-	Camera.rotation.z = 0.0
-	WheelSpinReference.rotation.x = 0.0
-	ground_normal = Vector3.UP
-
-
-func _physics_process(delta):
+func _physics_process(_delta):
 	# Attach car model to ball
 	Car.transform.origin = Ball.transform.origin
 	
-	if RayCast.is_colliding():
-		ground_normal = RayCast.get_collision_normal().normalized()
-	else:
-		ground_normal = Vector3.UP
-	
-	# Smoothly align car's up direction with the surface normal
-	var rotation_axis = Car.global_transform.basis.y.cross(ground_normal).normalized()
-	var angle = acos(clamp(Car.global_transform.basis.y.dot(ground_normal), -1.0, 1.0))
-	if angle > 0.01:
-		var new_rotation = Quaternion(rotation_axis, angle * delta * 5.0)
-		Car.transform.basis = Basis(new_rotation) * Car.transform.basis
-		Car.transform = Car.transform.orthonormalized()
-	
-	# Calculate forward tangent along surface
-	var forward_tangent = (-Car.global_transform.basis.z - ground_normal * -Car.global_transform.basis.z.dot(ground_normal)).normalized()
-	
 	# Apply driving force
 	if not is_boosting:
-		Ball.apply_central_force(forward_tangent * speed_force)
+		Ball.apply_central_force(-Car.global_transform.basis.z.normalized() * speed_force)
 	else:
-		Ball.apply_central_force(forward_tangent * DRIFT_BOOST_SPEED)
+		Ball.apply_central_force(-Car.global_transform.basis.z.normalized() * DRIFT_BOOST_SPEED)
 
 
 func _process(delta):
 	ball_speed = Ball.linear_velocity.length()
 	forward_direction = round(-Car.global_transform.basis.z.normalized().dot(Ball.linear_velocity.normalized()))
 	
+	acceleration_input = Input.get_axis("Brake", "Accelerate")
+	steering_input = Input.get_axis("Right", "Left")
+	
 	# Handle basic movement
-	acceleration_input = Input.get_action_strength("Accelerate") - Input.get_action_strength("Brake")
-	steering_input = Input.get_action_strength("Left") - Input.get_action_strength("Right")
-	
-	speed_force = acceleration_input * TOP_SPEED
-	turn_force = lerp(turn_force, deg_to_rad(STEERING_STRENGTH) * steering_input, 10 * delta)
-	speed_force = clamp(speed_force, -150.0, 200.0)
+	if acceleration_input > 0.0:
+		speed_force = lerp(speed_force, acceleration_input * TOP_SPEED, ACCELERATION * delta)
+	else:
+		speed_force = lerp(speed_force, acceleration_input * abs(MIN_SPEED), ACCELERATION * delta)
+	turn_force = lerp(turn_force, deg_to_rad(STEERING_STRENGTH) * steering_input, TURN_SPEED * delta)
+	speed_force = clamp(speed_force, MIN_SPEED, TOP_SPEED)
 	turn_force = clamp(turn_force, -0.2, 0.2)
-	
-	# Wheel spin
-	WheelSpinReference.rotate_x(ball_speed * forward_direction * delta)
-	BackLeftWheel.rotation.x = WheelSpinReference.rotation.x
-	BackRightWheel.rotation.x = BackLeftWheel.rotation.x
-	FrontLeftWheel.rotation.x = BackLeftWheel.rotation.x
-	FrontRightWheel.rotation.x = BackLeftWheel.rotation.x
-	
-	# Front wheel rotation
-	FrontLeftWheel.rotation.y = lerp(FrontLeftWheel.rotation.y, steering_input / 2, 10 * delta)
-	FrontRightWheel.rotation.y = FrontLeftWheel.rotation.y
-	
-	# Smoke particle position and gravity
-	ParticleEmitter.rotation.y = lerp(ParticleEmitter.rotation.y, turn_force, delta)
-	ParticleEmitter.process_material.gravity.z = ball_speed / 10.0
 	
 	# Handle drifting
 	if Input.is_action_pressed("Drift") and not is_drifting and acceleration_input > 0.5 and abs(steering_input) > 0.5 and ball_speed > 20.0:
-		var drift_force_average: float = (DRIFT_FORCE_MIN + DRIFT_FORCE_MAX) / 2
+		var drift_force_average: float = (DRIFT_FORCE_MIN + DRIFT_FORCE_MAX) / 2.0
 		if steering_input > 0.0:
 			turn_force = drift_force_average
 		else:
@@ -145,18 +84,9 @@ func _process(delta):
 		start_drift()
 	
 	if is_drifting:
-		var drift_amount: float = deg_to_rad(STEERING_STRENGTH * DRIFT_STRENGTH) * steering_input
-		turn_force = drift_direction + drift_amount
-		if drift_direction > 0.0:
-			turn_force = clamp(turn_force, DRIFT_FORCE_MIN, DRIFT_FORCE_MAX)
-		else:
-			turn_force = clamp(turn_force, -DRIFT_FORCE_MAX, -DRIFT_FORCE_MIN)
-		body_tilt = BODY_TILT_DRIFT
-	else:
-		body_tilt = BODY_TILT_NORMAL
-	
-	if is_drifting and (Input.is_action_just_released("Drift") or speed_force < 1):
-		stop_drift()
+		drift()
+		if Input.is_action_just_released("Drift") or speed_force < 1.0:
+			stop_drift()
 	
 	if ball_speed > 0.75:
 		turn(delta)
@@ -166,53 +96,28 @@ func _process(delta):
 	
 	drift_boost_stage = clamp(drift_boost_stage, 0, 3)
 	
-	# Handle camera FOV and distance
-	var speed_factor: float = clamp(ball_speed / 70.0, 0.0, 1.0)
-	var target_fov: float = CAMERA_FOV_NORMAL
-	var target_camera_distance: float = CAMERA_DISTANCE_NORMAL
-	
-	if forward_direction < 0:
-		target_fov = lerp(CAMERA_FOV_NORMAL, CAMERA_FOV_MIN, speed_factor)
-		target_camera_distance = lerp(CAMERA_DISTANCE_NORMAL, CAMERA_DISTANCE_MIN, speed_factor)
-	elif is_boosting:
-		target_fov = CAMERA_FOV_BOOST
-		target_camera_distance = CAMERA_DISTANCE_BOOST
+	# Align car to slopes
+	if RayCast.is_colliding():
+		ground_normal = RayCast.get_collision_normal()
+		new_transform = align_with_y(Car.global_transform, ground_normal)
+		Car.global_transform = Car.global_transform.interpolate_with(new_transform, 10.0 * delta)
 	else:
-		target_fov = lerp(CAMERA_FOV_NORMAL, CAMERA_FOV_MAX, speed_factor)
-		target_camera_distance = lerp(CAMERA_DISTANCE_NORMAL, CAMERA_DISTANCE_MAX, speed_factor)
+		ground_normal = Vector3.UP
+		new_transform = align_with_y(Car.global_transform, ground_normal)
+		Car.global_transform = Car.global_transform.interpolate_with(new_transform, 5.0 * delta)
 	
-	Camera.fov = lerp(Camera.fov, target_fov, 5 * delta)
-	Camera.position.z = lerp(Camera.position.z, target_camera_distance, 5 * delta)
-	
-	if is_drifting:
-		Camera.h_offset = lerp(Camera.h_offset, CAMERA_OFFSET_DRIFT * -drift_direction, 2.5 * delta)
-	elif turn_force != 0.0 and ball_speed > 0.75:
-		Camera.h_offset = lerp(Camera.h_offset, CAMERA_OFFSET_NORMAL * -turn_force * abs(acceleration_input), 2.5 * delta)
-	else:
-		Camera.h_offset = lerp(Camera.h_offset, 0.0, 2.5 * delta)
-	
-	# Automatically accelerate on touch screen devices
+	# Automatically accelerate on touchscreen devices
 	if DisplayServer.is_touchscreen_available():
 		if not Input.is_action_pressed("Brake"):
 			Input.action_press("Accelerate")
 		else:
 			Input.action_release("Accelerate")
-	
-	# Show variables on screen
-	DebugLabel.text = "speed_force: " + str(speed_force) + "\n" + "turn_force: " + str(turn_force) + "\n" + "ball_speed: " + str(ball_speed) + "\n" + "drift_boost_stage: " + str(drift_boost_stage) + "\n" + "forward_direction: " + str(forward_direction) + "\n" + "acceleration_input: " + str(acceleration_input) + "\n" + "steering_input: " + str(steering_input)
 
 
 func turn(delta):
-	var new_basis = Car.global_transform.basis.rotated(ground_normal, turn_force)
+	var new_basis = Car.global_transform.basis.rotated(Car.global_transform.basis.y, turn_force)
 	Car.global_transform.basis = Car.global_transform.basis.slerp(new_basis, TURN_SPEED * delta)
 	Car.global_transform = Car.global_transform.orthonormalized()
-	
-	# Rotate car when turning
-	CarModel.rotation.y = lerp(CarModel.rotation.y, PI + (turn_force / body_tilt), 10 * delta)
-	CarModel.rotation.y = clamp(CarModel.rotation.y, PI + -2, PI + 2)
-	
-	# Fix particle emitter position
-	ParticleEmitter.position.x = lerp(ParticleEmitter.position.x, (turn_force / body_tilt) * PARTICLE_OFFSET, 5 * delta)
 
 
 func start_drift():
@@ -223,6 +128,15 @@ func start_drift():
 		DriftTimer.start(DRIFT_STAGE_DELAY[drift_boost_stage])
 
 
+func drift():
+	var drift_amount: float = deg_to_rad(STEERING_STRENGTH * DRIFT_STRENGTH) * steering_input
+	turn_force = drift_direction + drift_amount
+	if drift_direction > 0.0:
+		turn_force = clamp(turn_force, DRIFT_FORCE_MIN, DRIFT_FORCE_MAX)
+	else:
+		turn_force = clamp(turn_force, -DRIFT_FORCE_MAX, -DRIFT_FORCE_MIN)
+
+
 func stop_drift():
 	if drift_boost_stage > 0:
 		is_boosting = true
@@ -231,6 +145,12 @@ func stop_drift():
 	is_drifting = false
 	drift_boost_stage = 0
 	DriftTimer.stop()
+
+
+func align_with_y(car_transform: Transform3D, new_y: Vector3):
+	car_transform.basis.y = new_y
+	car_transform.basis.x = -car_transform.basis.z.cross(new_y)
+	return car_transform.orthonormalized()
 
 
 func _on_drift_timer_timeout():

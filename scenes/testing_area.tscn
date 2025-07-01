@@ -1,4 +1,4 @@
-[gd_scene load_steps=98 format=4 uid="uid://c3brva72gh781"]
+[gd_scene load_steps=99 format=4 uid="uid://c3brva72gh781"]
 
 [ext_resource type="PackedScene" uid="uid://io7b4jh3ku2v" path="res://scenes/car.tscn" id="1_mb3qh"]
 [ext_resource type="Texture2D" uid="uid://h4xhxw1j3rac" path="res://icon.svg" id="1_mu1h5"]
@@ -34,6 +34,7 @@
 [ext_resource type="Texture2D" uid="uid://b0og23axt72sc" path="res://sprites/brake_button_lit.png" id="32_swnvk"]
 [ext_resource type="Texture2D" uid="uid://ckfefu11pyvyt" path="res://sprites/drift_button.png" id="33_nrqcm"]
 [ext_resource type="Texture2D" uid="uid://cme0xpqlreepi" path="res://sprites/drift_button_lit.png" id="34_prgsf"]
+[ext_resource type="Script" uid="uid://cefst74hphx1d" path="res://scripts/debug_label.gd" id="35_prgsf"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_rttje"]
 sky_horizon_color = Color(0.662243, 0.671743, 0.686743, 1)
@@ -721,6 +722,7 @@ offset_right = 209.0
 offset_bottom = 70.0
 text = "speed_input:"
 label_settings = SubResource("LabelSettings_xoq4j")
+script = ExtResource("35_prgsf")
 
 [node name="CSGBox3D" type="CSGBox3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -967.883, -0.329771, 0.155209)
