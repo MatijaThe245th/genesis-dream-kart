@@ -47,18 +47,10 @@ var ground_normal: Vector3
 var new_transform: Transform3D
 
 
-func _physics_process(_delta):
+func _physics_process(delta):
 	# Attach car model to ball
 	Car.transform.origin = Ball.transform.origin
-	
-	# Apply driving force
-	if not is_boosting:
-		Ball.apply_central_force(-Car.global_transform.basis.z.normalized() * speed_force)
-	else:
-		Ball.apply_central_force(-Car.global_transform.basis.z.normalized() * DRIFT_BOOST_SPEED)
 
-
-func _process(delta):
 	ball_speed = Ball.linear_velocity.length()
 	forward_direction = round(-Car.global_transform.basis.z.normalized().dot(Ball.linear_velocity.normalized()))
 	
@@ -73,6 +65,11 @@ func _process(delta):
 	turn_force = lerp(turn_force, deg_to_rad(STEERING_STRENGTH) * steering_input, TURN_SPEED * delta)
 	speed_force = clamp(speed_force, MIN_SPEED, TOP_SPEED)
 	turn_force = clamp(turn_force, -0.2, 0.2)
+	
+	if not is_boosting:
+		Ball.apply_central_force(-Car.global_transform.basis.z.normalized() * speed_force)
+	else:
+		Ball.apply_central_force(-Car.global_transform.basis.z.normalized() * DRIFT_BOOST_SPEED)
 	
 	# Handle drifting
 	if Input.is_action_pressed("Drift") and not is_drifting and acceleration_input > 0.5 and abs(steering_input) > 0.5 and ball_speed > 20.0:
@@ -93,6 +90,7 @@ func _process(delta):
 	
 	if ball_speed < 20.0:
 		is_drifting = false
+		is_boosting = false
 	
 	drift_boost_stage = clamp(drift_boost_stage, 0, 3)
 	
