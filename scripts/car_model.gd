@@ -10,7 +10,7 @@ extends Node3D
 @onready var FrontRightWheel = $FrontRightWheel
 
 # Customizable parameters
-const BODY_TILT_NORMAL: float = 1.0
+const BODY_TILT_NORMAL: float = 0.9
 const BODY_TILT_DRIFT: float = 0.2
 const PARTICLE_OFFSET: float = 1.5
 
@@ -30,7 +30,7 @@ func _process(delta):
 		body_tilt = BODY_TILT_NORMAL
 	
 	# Rotate car when turning
-	if TestCar.ball_speed > 0.75:
+	if TestCar.current_speed > 0.75:
 		rotation.y = lerp(rotation.y, PI + (TestCar.turn_force / body_tilt), 10.0 * delta)
 		rotation.y = clamp(rotation.y, PI - 2.0, PI + 2.0)
 		ParticleEmitter.position.x = lerp(ParticleEmitter.position.x, (TestCar.turn_force / body_tilt) * PARTICLE_OFFSET, 5 * delta)
@@ -39,7 +39,7 @@ func _process(delta):
 		ParticleEmitter.position.x = lerp(ParticleEmitter.position.x, 0.0, 5 * delta)
 	
 	# Wheel spin
-	WheelSpinReference.rotate_x(TestCar.ball_speed * TestCar.forward_direction * delta)
+	WheelSpinReference.rotate_x(TestCar.current_speed * TestCar.forward_direction * delta)
 	BackLeftWheel.rotation.x = WheelSpinReference.rotation.x
 	BackRightWheel.rotation.x = WheelSpinReference.rotation.x
 	FrontLeftWheel.rotation.x = WheelSpinReference.rotation.x
@@ -51,4 +51,4 @@ func _process(delta):
 	
 	# Smoke particle position and gravity
 	ParticleEmitter.rotation.y = lerp(ParticleEmitter.rotation.y, TestCar.turn_force, delta)
-	ParticleEmitter.process_material.gravity.z = TestCar.ball_speed / 10.0
+	ParticleEmitter.process_material.gravity.z = TestCar.current_speed / 10.0

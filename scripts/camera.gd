@@ -5,17 +5,22 @@ extends Camera3D
 
 # Customizable parameters
 const FOV_NORMAL: float = 70.0
-const FOV_MAX: float = 87.5
-const FOV_MIN: float = 55.0
+const FOV_MAX: float = 82.5
+const FOV_MIN: float = 57.5
 const FOV_BOOST: float = 95.0
 
 const DISTANCE_NORMAL: float = 4.0
-const DISTANCE_MAX: float = 3.75
-const DISTANCE_MIN: float = 4.0
-const DISTANCE_BOOST: float = 4.25
+const DISTANCE_MAX: float = 3.8
+const DISTANCE_MIN: float = 4.2
+const DISTANCE_BOOST: float = 4.1
 
 const OFFSET_NORMAL: float = 3.0
 const OFFSET_DRIFT: float = 5.0
+
+# Dynamic variables
+var speed_factor: float
+var target_fov: float
+var target_camera_distance: float
 
 
 func _ready():
@@ -24,9 +29,8 @@ func _ready():
 
 
 func _process(delta):
-	var speed_factor: float = clamp(TestCar.ball_speed / 70.0, 0.0, 1.0)
-	var target_fov: float = FOV_NORMAL
-	var target_camera_distance: float = DISTANCE_NORMAL
+	speed_factor = TestCar.current_speed / 70.0
+	speed_factor = clamp(speed_factor, 0.0, 1.0)
 	
 	# Handle camera FOV and distance
 	if TestCar.forward_direction < 0:
@@ -45,7 +49,7 @@ func _process(delta):
 	# Handle camera horizontal offset
 	if TestCar.is_drifting:
 		h_offset = lerp(h_offset, OFFSET_DRIFT * -TestCar.drift_direction, 2.5 * delta)
-	elif TestCar.turn_force != 0.0 and TestCar.ball_speed > 0.75:
+	elif TestCar.turn_force != 0.0 and TestCar.current_speed > 0.75:
 		h_offset = lerp(h_offset, OFFSET_NORMAL * -TestCar.turn_force * abs(TestCar.acceleration_input), 2.5 * delta)
 	else:
 		h_offset = lerp(h_offset, 0.0, 2.5 * delta)

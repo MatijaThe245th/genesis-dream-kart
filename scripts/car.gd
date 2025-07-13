@@ -1,24 +1,24 @@
-extends Node3D
+extends CharacterBody3D
 
 # Nodes
-@onready var Ball = $Ball
 @onready var Car = $Car
 @onready var DriftTimer = $"DriftTimer"
 @onready var BoostTimer = $"BoostTimer"
 @onready var RayCast = $Car/RayCast
 
 # Customizable parameters
-const TOP_SPEED: float = 200.0
-const MIN_SPEED: float = -150.0
-const ACCELERATION: float = 5.0
-const STEERING_STRENGTH: float = 12.5
-const TURN_SPEED: float = 7.5
+const TOP_SPEED: float = 65.0
+const MIN_SPEED: float = -50.0
+const ACCELERATION: float = 1.75
+const STEERING_STRENGTH: float = 12.0
+const TURN_SPEED: float = 7.0
+const GRAVITY: float = 50.0
 
 const DRIFT_FORCE_MIN: float = 0.1
 const DRIFT_FORCE_MAX: float = 0.25
 
 const DRIFT_STRENGTH: float = 0.5
-const DRIFT_BOOST_SPEED: float = 250.0
+const DRIFT_BOOST_SPEED: float = 80.0
 const DRIFT_BOOST_DURATION: Dictionary = {
 	1: 0.8,
 	2: 1.3,
@@ -38,7 +38,7 @@ var is_boosting: bool = false
 var acceleration_input: float
 var steering_input: float
 var forward_direction: int = 0
-var ball_speed: float = 0.0
+var current_speed: float = 0.0
 var speed_force: float = 0.0
 var turn_force: float = 0.0
 var drift_direction: float = 0.0
@@ -46,33 +46,49 @@ var drift_boost_stage: int = 0
 var ground_normal: Vector3
 var new_transform: Transform3D
 
+var horizontal_velocity: Vector3
+var vertical_velocity: Vector3
+
 
 func _physics_process(delta):
 	# Attach car model to ball
-	Car.transform.origin = Ball.transform.origin
+	Car.global_position = global_position
 
-	ball_speed = Ball.linear_velocity.length()
-	forward_direction = round(-Car.global_transform.basis.z.normalized().dot(Ball.linear_velocity.normalized()))
+	current_speed = velocity.length()
+	if current_speed > 1.0:
+		forward_direction = round(-Car.global_transform.basis.z.normalized().dot(velocity.normalized()))
+	else:
+		forward_direction = 0
 	
 	acceleration_input = Input.get_axis("Brake", "Accelerate")
 	steering_input = Input.get_axis("Right", "Left")
 	
 	# Handle basic movement
-	if acceleration_input > 0.0:
+	if is_boosting:
+		speed_force = DRIFT_BOOST_SPEED
+	elif acceleration_input > 0.0:
 		speed_force = lerp(speed_force, acceleration_input * TOP_SPEED, ACCELERATION * delta)
 	else:
 		speed_force = lerp(speed_force, acceleration_input * abs(MIN_SPEED), ACCELERATION * delta)
+	if not is_boosting:
+		speed_force = clamp(speed_force, MIN_SPEED, TOP_SPEED)
+	else:
+		speed_force = clamp(speed_force, MIN_SPEED, DRIFT_BOOST_SPEED)
+	
 	turn_force = lerp(turn_force, deg_to_rad(STEERING_STRENGTH) * steering_input, TURN_SPEED * delta)
-	speed_force = clamp(speed_force, MIN_SPEED, TOP_SPEED)
 	turn_force = clamp(turn_force, -0.2, 0.2)
 	
-	if not is_boosting:
-		Ball.apply_central_force(-Car.global_transform.basis.z.normalized() * speed_force)
+	horizontal_velocity = -Car.global_transform.basis.z.normalized() * speed_force
+	
+	if is_on_floor():
+		vertical_velocity.y = 0.0
 	else:
-		Ball.apply_central_force(-Car.global_transform.basis.z.normalized() * DRIFT_BOOST_SPEED)
+		vertical_velocity.y -= GRAVITY * delta
+	
+	velocity = horizontal_velocity + vertical_velocity
 	
 	# Handle drifting
-	if Input.is_action_pressed("Drift") and not is_drifting and acceleration_input > 0.5 and abs(steering_input) > 0.5 and ball_speed > 20.0:
+	if Input.is_action_pressed("Drift") and not is_drifting and acceleration_input > 0.5 and abs(steering_input) > 0.5 and current_speed > 20.0:
 		var drift_force_average: float = (DRIFT_FORCE_MIN + DRIFT_FORCE_MAX) / 2.0
 		if steering_input > 0.0:
 			turn_force = drift_force_average
@@ -85,10 +101,9 @@ func _physics_process(delta):
 		if Input.is_action_just_released("Drift") or speed_force < 1.0:
 			stop_drift()
 	
-	if ball_speed > 0.75:
-		turn(delta)
+	turn(delta)
 	
-	if ball_speed < 20.0:
+	if current_speed < 20.0:
 		is_drifting = false
 		is_boosting = false
 	
@@ -110,6 +125,8 @@ func _physics_process(delta):
 			Input.action_press("Accelerate")
 		else:
 			Input.action_release("Accelerate")
+	
+	move_and_slide()
 
 
 func turn(delta):

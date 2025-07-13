@@ -614,8 +614,8 @@ mesh = SubResource("BoxMesh_rttje")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -15.185, 0)
 shape = SubResource("BoxShape3D_rttje")
 
-[node name="Car" parent="." instance=ExtResource("1_mb3qh")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -428.031, 137.629, -5.36807)
+[node name="TestCar" parent="." instance=ExtResource("1_mb3qh")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -431.519, 162.35, -5.368)
 
 [node name="Figure8Circuit" type="StaticBody3D" parent="."]
 transform = Transform3D(-5.24537e-08, 0, 1.2, 0, 1.2, 0, -1.2, 0, -5.24537e-08, -427.719, 79.129, -21.449)
