@@ -1,6 +1,6 @@
 extends Label
 
-@onready var TestCar = $"../../../TestCar"
+@onready var TestCar: CharacterBody3D = $"../../../TestCar"
 
 
 func _process(_delta):

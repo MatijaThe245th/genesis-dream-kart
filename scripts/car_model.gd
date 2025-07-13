@@ -1,17 +1,18 @@
 extends Node3D
 
 # Nodes
-@onready var TestCar = $"../.."
-@onready var ParticleEmitter = $"../ParticleEmitter"
-@onready var WheelSpinReference = $"../WheelSpinReference"
-@onready var BackLeftWheel = $BackLeftWheel
-@onready var BackRightWheel = $BackRightWheel
-@onready var FrontLeftWheel = $FrontLeftWheel
-@onready var FrontRightWheel = $FrontRightWheel
+@onready var TestCar: CharacterBody3D = $"../.."
+@onready var ParticleEmitter: GPUParticles3D = $"../ParticleEmitter"
+@onready var WheelSpinReference: Node3D = $"../WheelSpinReference"
+@onready var BackLeftWheel: MeshInstance3D = $BackLeftWheel
+@onready var BackRightWheel: MeshInstance3D = $BackRightWheel
+@onready var FrontLeftWheel: MeshInstance3D = $FrontLeftWheel
+@onready var FrontRightWheel: MeshInstance3D = $FrontRightWheel
+@onready var AnimPlayer: AnimationPlayer = $"../../AnimPlayer"
 
 # Customizable parameters
 const BODY_TILT_NORMAL: float = 0.9
-const BODY_TILT_DRIFT: float = 0.2
+const BODY_TILT_DRIFT: float = 0.225
 const PARTICLE_OFFSET: float = 1.5
 
 # Dynamic variables
@@ -52,3 +53,6 @@ func _process(delta):
 	# Smoke particle position and gravity
 	ParticleEmitter.rotation.y = lerp(ParticleEmitter.rotation.y, TestCar.turn_force, delta)
 	ParticleEmitter.process_material.gravity.z = TestCar.current_speed / 10.0
+	
+	# Wheel glow based on drift stage
+	AnimPlayer.play("Drift Boost Stage " + str(TestCar.drift_boost_stage))

@@ -1,24 +1,24 @@
 extends CharacterBody3D
 
 # Nodes
-@onready var Car = $Car
-@onready var DriftTimer = $"DriftTimer"
-@onready var BoostTimer = $"BoostTimer"
-@onready var RayCast = $Car/RayCast
+@onready var Car: Node3D = $Car
+@onready var DriftTimer: Timer = $"DriftTimer"
+@onready var BoostTimer: Timer = $"BoostTimer"
+@onready var RayCast: RayCast3D = $Car/RayCast
 
 # Customizable parameters
-const TOP_SPEED: float = 65.0
-const MIN_SPEED: float = -50.0
+const TOP_SPEED: float = 60.0
+const MIN_SPEED: float = -45.0
 const ACCELERATION: float = 1.75
 const STEERING_STRENGTH: float = 12.0
 const TURN_SPEED: float = 7.0
 const GRAVITY: float = 50.0
 
-const DRIFT_FORCE_MIN: float = 0.1
-const DRIFT_FORCE_MAX: float = 0.25
+const DRIFT_FORCE_MIN: float = 0.125
+const DRIFT_FORCE_MAX: float = 0.275
 
 const DRIFT_STRENGTH: float = 0.5
-const DRIFT_BOOST_SPEED: float = 80.0
+const DRIFT_BOOST_SPEED: float = 75.0
 const DRIFT_BOOST_DURATION: Dictionary = {
 	1: 0.8,
 	2: 1.3,
@@ -45,7 +45,6 @@ var drift_direction: float = 0.0
 var drift_boost_stage: int = 0
 var ground_normal: Vector3
 var new_transform: Transform3D
-
 var horizontal_velocity: Vector3
 var vertical_velocity: Vector3
 

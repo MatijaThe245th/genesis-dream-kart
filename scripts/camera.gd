@@ -1,7 +1,7 @@
 extends Camera3D
 
 # Nodes
-@onready var TestCar = $"../.."
+@onready var TestCar: CharacterBody3D = $"../.."
 
 # Customizable parameters
 const FOV_NORMAL: float = 70.0
