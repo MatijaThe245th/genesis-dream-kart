@@ -387,10 +387,12 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.3, 0.3, 0.66)
 mesh = SubResource("ArrayMesh_hylxu")
 skeleton = NodePath("")
 
-[node name="Camera" type="Camera3D" parent="."]
+[node name="CameraPivot" type="Node3D" parent="."]
+script = ExtResource("3_jtldb")
+
+[node name="Camera" type="Camera3D" parent="CameraPivot"]
 transform = Transform3D(1, 0, 0, 0, 0.984808, 0.173648, 0, -0.173648, 0.984808, 0, 2, 4)
 current = true
-script = ExtResource("3_jtldb")
 
 [node name="ParticleEmitter" type="GPUParticles3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 1.5)

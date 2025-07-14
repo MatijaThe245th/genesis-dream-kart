@@ -51,12 +51,15 @@ var vertical_velocity: Vector3
 func _physics_process(delta):
 	current_speed = velocity.length()
 	if current_speed > 1.0:
-		forward_direction = round(-global_transform.basis.z.normalized().dot(velocity.normalized()))
+		forward_direction = speed_force / abs(speed_force)
 	else:
 		forward_direction = 0
 	
 	acceleration_input = Input.get_axis("Brake", "Accelerate")
-	steering_input = Input.get_axis("Right", "Left")
+	if forward_direction == -1:
+		steering_input = Input.get_axis("Left", "Right")
+	else:
+		steering_input = Input.get_axis("Right", "Left")
 	
 	# Handle basic movement
 	if is_boosting:
