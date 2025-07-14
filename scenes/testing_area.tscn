@@ -2,6 +2,7 @@
 
 [ext_resource type="PackedScene" uid="uid://io7b4jh3ku2v" path="res://scenes/car.tscn" id="1_mb3qh"]
 [ext_resource type="Texture2D" uid="uid://h4xhxw1j3rac" path="res://icon.svg" id="1_mu1h5"]
+[ext_resource type="Script" uid="uid://dr87wkx6ngo2m" path="res://scripts/testing_area.gd" id="1_t0soj"]
 [ext_resource type="Texture2D" uid="uid://5yokdxne7aig" path="res://models/DS DSi - Mario Kart DS - Figure Eight Circuit/cross_course/lambert238.png" id="4_8hhwm"]
 [ext_resource type="Texture2D" uid="uid://deumexsdnyuvy" path="res://models/DS DSi - Mario Kart DS - Figure Eight Circuit/cross_course/lambert244.png" id="5_hkio7"]
 [ext_resource type="Texture2D" uid="uid://bt5rdgsch2xrg" path="res://models/DS DSi - Mario Kart DS - Figure Eight Circuit/cross_course/lambert226.png" id="6_fh2s8"]
@@ -590,11 +591,10 @@ shadow_size = 5
 shadow_color = Color(0, 0, 0, 1)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_nrqcm"]
-albedo_color = Color(0.629675, 0.629675, 0.629675, 1)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_prgsf"]
+albedo_color = Color(0.481789, 0.48179, 0.481789, 1)
 
 [node name="Testing Area" type="Node3D"]
+script = ExtResource("1_t0soj")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_mu1h5")
@@ -615,7 +615,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -15.185, 0)
 shape = SubResource("BoxShape3D_rttje")
 
 [node name="TestCar" parent="." instance=ExtResource("1_mb3qh")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -431.519, 137.426, -5.368)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -830, 0.7, 55)
 
 [node name="Figure8Circuit" type="StaticBody3D" parent="."]
 transform = Transform3D(-5.24537e-08, 0, 1.2, 0, 1.2, 0, -1.2, 0, -5.24537e-08, -427.719, 79.129, -21.449)
@@ -731,16 +731,16 @@ size = Vector3(500, 1, 500)
 material = SubResource("StandardMaterial3D_nrqcm")
 
 [node name="CSGBox3D2" type="CSGBox3D" parent="."]
-transform = Transform3D(-1, 3.20405e-08, -8.93717e-08, 0, 0.930418, 0.402692, 8.74228e-08, 0.366501, -1.02229, -823.831, 2.17239, 2.17273)
+transform = Transform3D(-1, 3.20405e-08, -8.93717e-08, 0, 0.930418, 0.402692, 8.74228e-08, 0.366501, -1.02229, -823.831, 1.95338, 2.17273)
 use_collision = true
 size = Vector3(11.9956, 1, 10.626)
-material = SubResource("StandardMaterial3D_prgsf")
+material = SubResource("StandardMaterial3D_nrqcm")
 
 [node name="CSGBox3D3" type="CSGBox3D" parent="."]
 transform = Transform3D(-1, 7.81694e-08, -4.30097e-08, 0, 0.447759, 0.982448, 8.74228e-08, 0.894154, -0.491973, -837.275, 5.51994, -0.778337)
 use_collision = true
 size = Vector3(11.9956, 1, 10.626)
-material = SubResource("StandardMaterial3D_prgsf")
+material = SubResource("StandardMaterial3D_nrqcm")
 
 [node name="CSGSphere3D" type="CSGSphere3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -700.715, -11.0549, 0)
@@ -748,3 +748,4 @@ use_collision = true
 radius = 28.428
 radial_segments = 100
 rings = 100
+material = SubResource("StandardMaterial3D_nrqcm")

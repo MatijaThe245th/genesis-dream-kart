@@ -1,14 +1,15 @@
 extends Node3D
 
 # Nodes
-@onready var TestCar: CharacterBody3D = $"../.."
+@onready var TestCar: CharacterBody3D = $".."
+@onready var CollisionCapsule: CollisionShape3D = $"../CollisionCapsule"
 @onready var ParticleEmitter: GPUParticles3D = $"../ParticleEmitter"
 @onready var WheelSpinReference: Node3D = $"../WheelSpinReference"
 @onready var BackLeftWheel: MeshInstance3D = $BackLeftWheel
 @onready var BackRightWheel: MeshInstance3D = $BackRightWheel
 @onready var FrontLeftWheel: MeshInstance3D = $FrontLeftWheel
 @onready var FrontRightWheel: MeshInstance3D = $FrontRightWheel
-@onready var AnimPlayer: AnimationPlayer = $"../../AnimPlayer"
+@onready var AnimPlayer: AnimationPlayer = $"../AnimPlayer"
 
 # Customizable parameters
 const BODY_TILT_NORMAL: float = 0.9
@@ -38,6 +39,8 @@ func _process(delta):
 	else:
 		rotation.y = lerp(rotation.y, PI, 10.0 * delta)
 		ParticleEmitter.position.x = lerp(ParticleEmitter.position.x, 0.0, 5 * delta)
+	
+	CollisionCapsule.rotation.y = rotation.y
 	
 	# Wheel spin
 	WheelSpinReference.rotate_x(TestCar.current_speed * TestCar.forward_direction * delta)

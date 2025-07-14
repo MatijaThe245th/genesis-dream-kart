@@ -1,10 +1,9 @@
 extends CharacterBody3D
 
 # Nodes
-@onready var Car: Node3D = $Car
 @onready var DriftTimer: Timer = $"DriftTimer"
 @onready var BoostTimer: Timer = $"BoostTimer"
-@onready var RayCast: RayCast3D = $Car/RayCast
+@onready var RayCast: RayCast3D = $RayCast
 
 # Customizable parameters
 const TOP_SPEED: float = 60.0
@@ -50,12 +49,9 @@ var vertical_velocity: Vector3
 
 
 func _physics_process(delta):
-	# Attach car model to ball
-	Car.global_position = global_position
-
 	current_speed = velocity.length()
 	if current_speed > 1.0:
-		forward_direction = round(-Car.global_transform.basis.z.normalized().dot(velocity.normalized()))
+		forward_direction = round(-global_transform.basis.z.normalized().dot(velocity.normalized()))
 	else:
 		forward_direction = 0
 	
@@ -77,7 +73,7 @@ func _physics_process(delta):
 	turn_force = lerp(turn_force, deg_to_rad(STEERING_STRENGTH) * steering_input, TURN_SPEED * delta)
 	turn_force = clamp(turn_force, -0.2, 0.2)
 	
-	horizontal_velocity = -Car.global_transform.basis.z.normalized() * speed_force
+	horizontal_velocity = -global_transform.basis.z.normalized() * speed_force
 	
 	if is_on_floor():
 		vertical_velocity.y = 0.0
@@ -87,7 +83,7 @@ func _physics_process(delta):
 	velocity = horizontal_velocity + vertical_velocity
 	
 	# Handle drifting
-	if Input.is_action_pressed("Drift") and not is_drifting and acceleration_input > 0.5 and abs(steering_input) > 0.5 and current_speed > 20.0:
+	if Input.is_action_pressed("Drift") and not is_on_wall() and not is_drifting and acceleration_input > 0.5 and abs(steering_input) > 0.5 and current_speed > 20.0:
 		var drift_force_average: float = (DRIFT_FORCE_MIN + DRIFT_FORCE_MAX) / 2.0
 		if steering_input > 0.0:
 			turn_force = drift_force_average
@@ -99,10 +95,14 @@ func _physics_process(delta):
 		drift()
 		if Input.is_action_just_released("Drift") or speed_force < 1.0:
 			stop_drift()
+	else:
+		if drift_boost_stage != 0:
+			drift_boost_stage = 0
 	
-	turn(delta)
+	if current_speed > 0.5:
+		turn(delta)
 	
-	if current_speed < 20.0:
+	if current_speed < 10.0:
 		is_drifting = false
 		is_boosting = false
 	
@@ -111,27 +111,22 @@ func _physics_process(delta):
 	# Align car to slopes
 	if RayCast.is_colliding():
 		ground_normal = RayCast.get_collision_normal()
-		new_transform = align_with_y(Car.global_transform, ground_normal)
-		Car.global_transform = Car.global_transform.interpolate_with(new_transform, 10.0 * delta)
+		new_transform = align_with_y(global_transform, ground_normal)
+		global_transform = global_transform.interpolate_with(new_transform, 10.0 * delta)
 	else:
-		ground_normal = Vector3.UP
-		new_transform = align_with_y(Car.global_transform, ground_normal)
-		Car.global_transform = Car.global_transform.interpolate_with(new_transform, 5.0 * delta)
+		ground_normal = lerp(ground_normal, Vector3.UP, 5 * delta)
+		new_transform = align_with_y(global_transform, ground_normal)
+		global_transform = global_transform.interpolate_with(new_transform, 5.0 * delta)
 	
-	# Automatically accelerate on touchscreen devices
-	if DisplayServer.is_touchscreen_available():
-		if not Input.is_action_pressed("Brake"):
-			Input.action_press("Accelerate")
-		else:
-			Input.action_release("Accelerate")
+	up_direction = ground_normal
 	
 	move_and_slide()
 
 
 func turn(delta):
-	var new_basis = Car.global_transform.basis.rotated(Car.global_transform.basis.y, turn_force)
-	Car.global_transform.basis = Car.global_transform.basis.slerp(new_basis, TURN_SPEED * delta)
-	Car.global_transform = Car.global_transform.orthonormalized()
+	var new_basis = global_transform.basis.rotated(global_transform.basis.y, turn_force)
+	global_transform.basis = global_transform.basis.slerp(new_basis, TURN_SPEED * delta)
+	global_transform = global_transform.orthonormalized()
 
 
 func start_drift():

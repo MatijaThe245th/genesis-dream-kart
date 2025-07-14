@@ -1,12 +1,10 @@
-[gd_scene load_steps=35 format=4 uid="uid://io7b4jh3ku2v"]
+[gd_scene load_steps=36 format=4 uid="uid://io7b4jh3ku2v"]
 
 [ext_resource type="Texture2D" uid="uid://ba8qwbkow6gvc" path="res://models/colormap.png" id="1_c35m8"]
 [ext_resource type="Script" uid="uid://c4ts2lchf6o8u" path="res://scripts/car.gd" id="1_qt2eu"]
 [ext_resource type="Script" uid="uid://dc1i15tvsfyge" path="res://scripts/car_model.gd" id="2_3mrxu"]
 [ext_resource type="Texture2D" uid="uid://h5erhcid1uu5" path="res://models/smoke_07.png" id="3_50v30"]
 [ext_resource type="Script" uid="uid://1lac1txlddh6" path="res://scripts/camera.gd" id="3_jtldb"]
-
-[sub_resource type="SphereShape3D" id="SphereShape3D_c35m8"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_a4axc"]
 resource_name = "colormap"
@@ -264,6 +262,29 @@ particles_anim_loop = false
 material = SubResource("StandardMaterial3D_qt2eu")
 size = Vector2(0.5, 0.5)
 
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_cp117"]
+radius = 0.7
+height = 2.6
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_3mrxu"]
+radius = 0.7
+
+[sub_resource type="Animation" id="Animation_cp117"]
+resource_name = "Drift Boost Stage 0"
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Model/BackLeftWheel:mesh:surface_0/material:emission")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(0, 0, 0, 1)]
+}
+
 [sub_resource type="Animation" id="Animation_3mrxu"]
 resource_name = "Drift Boost Stage 1"
 length = 0.5
@@ -272,7 +293,7 @@ step = 0.25
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
-tracks/0/path = NodePath("Car/Model/BackLeftWheel:mesh:surface_0/material:emission")
+tracks/0/path = NodePath("Model/BackLeftWheel:mesh:surface_0/material:emission")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
@@ -290,7 +311,7 @@ step = 0.25
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
-tracks/0/path = NodePath("Car/Model/BackLeftWheel:mesh:surface_0/material:emission")
+tracks/0/path = NodePath("Model/BackLeftWheel:mesh:surface_0/material:emission")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
@@ -308,7 +329,7 @@ step = 0.25
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
-tracks/0/path = NodePath("Car/Model/BackLeftWheel:mesh:surface_0/material:emission")
+tracks/0/path = NodePath("Model/BackLeftWheel:mesh:surface_0/material:emission")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
@@ -316,22 +337,6 @@ tracks/0/keys = {
 "transitions": PackedFloat32Array(1, 1, 1),
 "update": 0,
 "values": [Color(0, 0, 0, 1), Color(0, 0.470588, 0.956863, 1), Color(0, 0, 0, 1)]
-}
-
-[sub_resource type="Animation" id="Animation_cp117"]
-resource_name = "Drift Boost Stage 0"
-length = 0.001
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath("Car/Model/BackLeftWheel:mesh:surface_0/material:emission")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"update": 0,
-"values": [Color(0, 0, 0, 1)]
 }
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_4clw4"]
@@ -346,64 +351,67 @@ _data = {
 wall_min_slide_angle = 0.0
 script = ExtResource("1_qt2eu")
 
-[node name="BallCollision" type="CollisionShape3D" parent="."]
-shape = SubResource("SphereShape3D_c35m8")
-
-[node name="Car" type="Node3D" parent="."]
-
-[node name="Model" type="Node3D" parent="Car"]
-transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, -0.5, 0)
+[node name="Model" type="Node3D" parent="."]
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 0, 0)
 script = ExtResource("2_3mrxu")
 
-[node name="Body" type="MeshInstance3D" parent="Car/Model"]
+[node name="Body" type="MeshInstance3D" parent="Model"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.15, -0.025)
 mesh = SubResource("ArrayMesh_qt2eu")
 skeleton = NodePath("")
 surface_material_override/0 = SubResource("StandardMaterial3D_50v30")
 
-[node name="Spoiler" type="MeshInstance3D" parent="Car/Model/Body"]
+[node name="Spoiler" type="MeshInstance3D" parent="Model/Body"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, -1.04369)
 mesh = SubResource("ArrayMesh_jtldb")
 skeleton = NodePath("")
 surface_material_override/0 = SubResource("StandardMaterial3D_3mrxu")
 
-[node name="BackLeftWheel" type="MeshInstance3D" parent="Car/Model"]
+[node name="BackLeftWheel" type="MeshInstance3D" parent="Model"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.3, 0.3, -0.66)
 mesh = SubResource("ArrayMesh_cp117")
 skeleton = NodePath("")
 
-[node name="BackRightWheel" type="MeshInstance3D" parent="Car/Model"]
+[node name="BackRightWheel" type="MeshInstance3D" parent="Model"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.3, 0.3, -0.66)
 mesh = SubResource("ArrayMesh_ctevm")
 skeleton = NodePath("")
 
-[node name="FrontLeftWheel" type="MeshInstance3D" parent="Car/Model"]
+[node name="FrontLeftWheel" type="MeshInstance3D" parent="Model"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.3, 0.3, 0.66)
 mesh = SubResource("ArrayMesh_gm33m")
 skeleton = NodePath("")
 
-[node name="FrontRightWheel" type="MeshInstance3D" parent="Car/Model"]
+[node name="FrontRightWheel" type="MeshInstance3D" parent="Model"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.3, 0.3, 0.66)
 mesh = SubResource("ArrayMesh_hylxu")
 skeleton = NodePath("")
 
-[node name="Camera" type="Camera3D" parent="Car"]
-transform = Transform3D(1, 0, 0, 0, 0.984808, 0.173648, 0, -0.173648, 0.984808, 0, 1.5, 4)
+[node name="Camera" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.984808, 0.173648, 0, -0.173648, 0.984808, 0, 2, 4)
 current = true
 script = ExtResource("3_jtldb")
 
-[node name="ParticleEmitter" type="GPUParticles3D" parent="Car"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.2, 1.5)
+[node name="ParticleEmitter" type="GPUParticles3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 1.5)
+visible = false
 lifetime = 2.0
 fixed_fps = 60
 local_coords = true
 process_material = SubResource("ParticleProcessMaterial_cp117")
 draw_pass_1 = SubResource("QuadMesh_4clw4")
 
-[node name="WheelSpinReference" type="Node3D" parent="Car"]
+[node name="WheelSpinReference" type="Node3D" parent="."]
 
-[node name="RayCast" type="RayCast3D" parent="Car"]
-target_position = Vector3(0, -1.5, 0)
+[node name="CollisionCapsule" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0.7, 0.05)
+shape = SubResource("CapsuleShape3D_cp117")
+
+[node name="CollisionSphere" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0.65, 0)
+shape = SubResource("SphereShape3D_3mrxu")
+
+[node name="RayCast" type="RayCast3D" parent="."]
 
 [node name="DriftTimer" type="Timer" parent="."]
 wait_time = 2.0
