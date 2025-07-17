@@ -50,8 +50,12 @@ func _process(delta):
 	FrontRightWheel.rotation.x = WheelSpinReference.rotation.x
 	
 	# Front wheel rotation
-	FrontLeftWheel.rotation.y = lerp(FrontLeftWheel.rotation.y, TestCar.steering_input / 2.0, 10.0 * delta)
-	FrontRightWheel.rotation.y = FrontLeftWheel.rotation.y
+	if TestCar.forward_direction == -1:
+		FrontLeftWheel.rotation.y = lerp(FrontLeftWheel.rotation.y, -TestCar.steering_input / 2.0, 10.0 * delta)
+		FrontRightWheel.rotation.y = FrontLeftWheel.rotation.y
+	else:
+		FrontLeftWheel.rotation.y = lerp(FrontLeftWheel.rotation.y, TestCar.steering_input / 2.0, 10.0 * delta)
+		FrontRightWheel.rotation.y = FrontLeftWheel.rotation.y
 	
 	# Smoke particle position and gravity
 	ParticleEmitter.rotation.y = lerp(ParticleEmitter.rotation.y, TestCar.turn_force, delta)

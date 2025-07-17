@@ -46,6 +46,7 @@ var ground_normal: Vector3
 var new_transform: Transform3D
 var horizontal_velocity: Vector3
 var vertical_velocity: Vector3
+var drift_amount: float
 
 
 func _physics_process(delta):
@@ -64,14 +65,13 @@ func _physics_process(delta):
 	# Handle basic movement
 	if is_boosting:
 		speed_force = DRIFT_BOOST_SPEED
+		speed_force = clamp(speed_force, MIN_SPEED, DRIFT_BOOST_SPEED)
 	elif acceleration_input > 0.0:
 		speed_force = lerp(speed_force, acceleration_input * TOP_SPEED, ACCELERATION * delta)
-	else:
-		speed_force = lerp(speed_force, acceleration_input * abs(MIN_SPEED), ACCELERATION * delta)
-	if not is_boosting:
 		speed_force = clamp(speed_force, MIN_SPEED, TOP_SPEED)
 	else:
-		speed_force = clamp(speed_force, MIN_SPEED, DRIFT_BOOST_SPEED)
+		speed_force = lerp(speed_force, acceleration_input * abs(MIN_SPEED), ACCELERATION * delta)
+		speed_force = clamp(speed_force, MIN_SPEED, TOP_SPEED)
 	
 	turn_force = lerp(turn_force, deg_to_rad(STEERING_STRENGTH) * steering_input, TURN_SPEED * delta)
 	turn_force = clamp(turn_force, -0.2, 0.2)
@@ -86,7 +86,7 @@ func _physics_process(delta):
 	velocity = horizontal_velocity + vertical_velocity
 	
 	# Handle drifting
-	if Input.is_action_pressed("Drift") and not is_on_wall() and not is_drifting and acceleration_input > 0.5 and abs(steering_input) > 0.5 and current_speed > 20.0:
+	if Input.is_action_pressed("Drift") and not is_drifting and acceleration_input > 0.5 and abs(steering_input) > 0.5 and current_speed > 20.0:
 		var drift_force_average: float = (DRIFT_FORCE_MIN + DRIFT_FORCE_MAX) / 2.0
 		if steering_input > 0.0:
 			turn_force = drift_force_average
@@ -105,7 +105,7 @@ func _physics_process(delta):
 	if current_speed > 0.5:
 		turn(delta)
 	
-	if current_speed < 10.0:
+	if current_speed < 10.0 and not is_on_wall():
 		is_drifting = false
 		is_boosting = false
 	
@@ -141,12 +141,14 @@ func start_drift():
 
 
 func drift():
-	var drift_amount: float = deg_to_rad(STEERING_STRENGTH * DRIFT_STRENGTH) * steering_input
+	drift_amount = deg_to_rad(STEERING_STRENGTH * DRIFT_STRENGTH) * steering_input
 	turn_force = drift_direction + drift_amount
 	if drift_direction > 0.0:
 		turn_force = clamp(turn_force, DRIFT_FORCE_MIN, DRIFT_FORCE_MAX)
+		drift_direction = clamp(drift_direction, 0.0, 100.0)
 	else:
 		turn_force = clamp(turn_force, -DRIFT_FORCE_MAX, -DRIFT_FORCE_MIN)
+		drift_direction = clamp(drift_direction, -100.0, 0.0)
 
 
 func stop_drift():
