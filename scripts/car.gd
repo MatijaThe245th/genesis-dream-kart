@@ -99,8 +99,9 @@ func _physics_process(delta):
 		if Input.is_action_just_released("Drift") or speed_force < 1.0:
 			stop_drift()
 	else:
-		if drift_boost_stage != 0:
-			drift_boost_stage = 0
+		drift_boost_stage = 0
+		drift_direction = 0.0
+		drift_amount = 0.0
 	
 	if current_speed > 0.5:
 		turn(delta)
@@ -115,11 +116,11 @@ func _physics_process(delta):
 	if RayCast.is_colliding():
 		ground_normal = RayCast.get_collision_normal()
 		new_transform = align_with_y(global_transform, ground_normal)
-		global_transform = global_transform.interpolate_with(new_transform, 10.0 * delta)
+		global_transform = global_transform.interpolate_with(new_transform, 7.5 * delta)
 	else:
-		ground_normal = lerp(ground_normal, Vector3.UP, 5 * delta)
+		ground_normal = Vector3.UP
 		new_transform = align_with_y(global_transform, ground_normal)
-		global_transform = global_transform.interpolate_with(new_transform, 5.0 * delta)
+		global_transform = global_transform.interpolate_with(new_transform, 1.5 * delta)
 	
 	up_direction = ground_normal
 	
