@@ -396,7 +396,7 @@ current = true
 
 [node name="ParticleEmitter" type="GPUParticles3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 1.5)
-visible = false
+emitting = false
 lifetime = 2.0
 fixed_fps = 60
 local_coords = true

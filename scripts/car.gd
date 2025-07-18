@@ -47,6 +47,7 @@ var new_transform: Transform3D
 var horizontal_velocity: Vector3
 var vertical_velocity: Vector3
 var drift_amount: float
+var slope_angle: float
 
 
 func _physics_process(delta):
@@ -83,7 +84,7 @@ func _physics_process(delta):
 	else:
 		vertical_velocity.y -= GRAVITY * delta
 	
-	velocity = horizontal_velocity + vertical_velocity
+	velocity = horizontal_velocity + vertical_velocity * up_direction
 	
 	# Handle drifting
 	if Input.is_action_pressed("Drift") and not is_drifting and acceleration_input > 0.5 and abs(steering_input) > 0.5 and current_speed > 20.0:
@@ -116,13 +117,14 @@ func _physics_process(delta):
 	if RayCast.is_colliding():
 		ground_normal = RayCast.get_collision_normal()
 		new_transform = align_with_y(global_transform, ground_normal)
-		global_transform = global_transform.interpolate_with(new_transform, 7.5 * delta)
+		global_transform = global_transform.interpolate_with(new_transform, 10.0 * delta)
 	else:
 		ground_normal = Vector3.UP
 		new_transform = align_with_y(global_transform, ground_normal)
 		global_transform = global_transform.interpolate_with(new_transform, 1.5 * delta)
 	
 	up_direction = ground_normal
+	slope_angle = rad_to_deg(acos(ground_normal.dot(Vector3.UP)))
 	
 	move_and_slide()
 

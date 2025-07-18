@@ -1,0 +1,11 @@
+Model Information:
+* title:	Sonic The Hedgehog Act1 loop diorama
+* source:	https://sketchfab.com/3d-models/sonic-the-hedgehog-act1-loop-diorama-669a92f1475444f596a846ba326655de
+* author:	losdayver (https://sketchfab.com/losdayver)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Sonic The Hedgehog Act1 loop diorama" (https://sketchfab.com/3d-models/sonic-the-hedgehog-act1-loop-diorama-669a92f1475444f596a846ba326655de) by losdayver (https://sketchfab.com/losdayver) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

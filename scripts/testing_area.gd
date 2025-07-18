@@ -14,13 +14,7 @@ func _process(_delta):
 		reset_car(Vector3(-427.5, 137.5, -5.0))
 	if Input.is_action_just_pressed("Test Area 2"):
 		reset_car(Vector3(-830.0, 0.7, 55.0))
-	
-	# Automatically accelerate on touchscreen devices (temporary)
-	if DisplayServer.is_touchscreen_available():
-		if not Input.is_action_pressed("Brake"):
-			Input.action_press("Accelerate")
-		else:
-			Input.action_release("Accelerate")
+
 
 func reset_car(car_position: Vector3):
 	TestCar.position = car_position
