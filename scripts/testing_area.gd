@@ -9,7 +9,7 @@ func _ready():
 
 
 func _process(_delta):
-	# Teleports to test areas
+	# Teleport to test areas
 	if Input.is_action_just_pressed("Test Area 1"):
 		reset_car(Vector3(-427.5, 137.5, -5.0))
 	if Input.is_action_just_pressed("Test Area 2"):

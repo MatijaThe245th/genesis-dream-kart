@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ckfefu11pyvyt"
-path="res://.godot/imported/drift_button.png-690348ce7a8a627f7dab380f5ca9368d.ctex"
+uid="uid://dttcygour4q1y"
+path="res://.godot/imported/touch_controls.png-898ef2e4991a51076067cf8f9958bd5b.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://sprites/drift_button.png"
-dest_files=["res://.godot/imported/drift_button.png-690348ce7a8a627f7dab380f5ca9368d.ctex"]
+source_file="res://sprites/touch_controls.png"
+dest_files=["res://.godot/imported/touch_controls.png-898ef2e4991a51076067cf8f9958bd5b.ctex"]
 
 [params]
 

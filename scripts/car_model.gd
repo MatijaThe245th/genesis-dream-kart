@@ -33,12 +33,12 @@ func _process(delta):
 	
 	# Rotate car when turning
 	if TestCar.current_speed > 0.75:
-		rotation.y = lerp(rotation.y, PI + (TestCar.turn_force / body_tilt), 10.0 * delta)
+		rotation.y = lerp(rotation.y, PI + (TestCar.turn_force / body_tilt), TestCar.TURN_SPEED * delta)
 		rotation.y = clamp(rotation.y, PI - 2.0, PI + 2.0)
-		ParticleEmitter.position.x = lerp(ParticleEmitter.position.x, (TestCar.turn_force / body_tilt) * PARTICLE_OFFSET, 5 * delta)
+		ParticleEmitter.position.x = lerp(ParticleEmitter.position.x, (TestCar.turn_force / body_tilt) * PARTICLE_OFFSET, 5.0 * delta)
 	else:
 		rotation.y = lerp(rotation.y, PI, 10.0 * delta)
-		ParticleEmitter.position.x = lerp(ParticleEmitter.position.x, 0.0, 5 * delta)
+		ParticleEmitter.position.x = lerp(ParticleEmitter.position.x, 0.0, 5.0 * delta)
 	
 	CollisionCapsule.rotation.y = rotation.y
 	
