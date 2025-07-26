@@ -21,8 +21,10 @@ var body_tilt: float
 
 
 func _ready():
-	rotation_degrees.y = 180.0
+	rotation.y = PI
 	WheelSpinReference.rotation.x = 0.0
+	ParticleEmitter.position.x = 0.0
+	ParticleEmitter.rotation.y = 0.0
 
 
 func _process(delta):
@@ -34,11 +36,11 @@ func _process(delta):
 	# Rotate car when turning
 	if TestCar.current_speed > 0.75:
 		rotation.y = lerp(rotation.y, PI + (TestCar.turn_force / body_tilt), TestCar.TURN_SPEED * delta)
-		rotation.y = clamp(rotation.y, PI - 2.0, PI + 2.0)
 		ParticleEmitter.position.x = lerp(ParticleEmitter.position.x, (TestCar.turn_force / body_tilt) * PARTICLE_OFFSET, 5.0 * delta)
 	else:
 		rotation.y = lerp(rotation.y, PI, 10.0 * delta)
 		ParticleEmitter.position.x = lerp(ParticleEmitter.position.x, 0.0, 5.0 * delta)
+	rotation.y = clamp(rotation.y, PI - 1.5, PI + 1.5)
 	
 	CollisionCapsule.rotation.y = rotation.y
 	
@@ -50,12 +52,8 @@ func _process(delta):
 	FrontRightWheel.rotation.x = WheelSpinReference.rotation.x
 	
 	# Front wheel rotation
-	if TestCar.forward_direction == -1:
-		FrontLeftWheel.rotation.y = lerp(FrontLeftWheel.rotation.y, -TestCar.steering_input / 2.0, 10.0 * delta)
-		FrontRightWheel.rotation.y = FrontLeftWheel.rotation.y
-	else:
-		FrontLeftWheel.rotation.y = lerp(FrontLeftWheel.rotation.y, TestCar.steering_input / 2.0, 10.0 * delta)
-		FrontRightWheel.rotation.y = FrontLeftWheel.rotation.y
+	FrontLeftWheel.rotation.y = lerp(FrontLeftWheel.rotation.y, (TestCar.steering_input * TestCar.forward_direction) / 2.0, 10.0 * delta)
+	FrontRightWheel.rotation.y = FrontLeftWheel.rotation.y
 	
 	# Smoke particle position and gravity
 	ParticleEmitter.rotation.y = lerp(ParticleEmitter.rotation.y, TestCar.turn_force, delta)

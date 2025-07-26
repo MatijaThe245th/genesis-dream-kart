@@ -742,7 +742,7 @@ grow_vertical = 0
 [node name="Left" type="TouchScreenButton" parent="UI/LeftContainer"]
 self_modulate = Color(1, 1, 1, 0.5)
 position = Vector2(100, -230)
-scale = Vector2(0.171, 0.171)
+scale = Vector2(0.15, 0.15)
 texture_normal = SubResource("AtlasTexture_otpac")
 texture_pressed = SubResource("AtlasTexture_7mbga")
 shape = SubResource("RectangleShape2D_8hhwm")
@@ -753,7 +753,7 @@ visibility_mode = 1
 [node name="Right" type="TouchScreenButton" parent="UI/LeftContainer"]
 self_modulate = Color(1, 1, 1, 0.5)
 position = Vector2(300, -230)
-scale = Vector2(0.171, 0.171)
+scale = Vector2(0.15, 0.15)
 texture_normal = SubResource("AtlasTexture_nrqcm")
 texture_pressed = SubResource("AtlasTexture_prgsf")
 shape = SubResource("RectangleShape2D_6vkq6")
@@ -773,8 +773,8 @@ grow_vertical = 0
 
 [node name="Accelerate" type="TouchScreenButton" parent="UI/RightContainer"]
 self_modulate = Color(1, 1, 1, 0.5)
-position = Vector2(-275, -430)
-scale = Vector2(0.171, 0.171)
+position = Vector2(-250, -430)
+scale = Vector2(0.15, 0.15)
 texture_normal = SubResource("AtlasTexture_6vkq6")
 texture_pressed = SubResource("AtlasTexture_swnvk")
 shape = SubResource("RectangleShape2D_nrqcm")
@@ -783,8 +783,8 @@ visibility_mode = 1
 
 [node name="Brake" type="TouchScreenButton" parent="UI/RightContainer"]
 self_modulate = Color(1, 1, 1, 0.5)
-position = Vector2(-275, -230)
-scale = Vector2(0.171, 0.171)
+position = Vector2(-250, -230)
+scale = Vector2(0.15, 0.15)
 texture_normal = SubResource("AtlasTexture_t0soj")
 texture_pressed = SubResource("AtlasTexture_0poou")
 shape = SubResource("RectangleShape2D_nrqcm")
@@ -793,8 +793,8 @@ visibility_mode = 1
 
 [node name="Drift" type="TouchScreenButton" parent="UI/RightContainer"]
 self_modulate = Color(1, 1, 1, 0.5)
-position = Vector2(-475, -230)
-scale = Vector2(0.171, 0.171)
+position = Vector2(-450, -230)
+scale = Vector2(0.15, 0.15)
 texture_normal = SubResource("AtlasTexture_fh2s8")
 texture_pressed = SubResource("AtlasTexture_1qh2h")
 shape = SubResource("RectangleShape2D_t0soj")

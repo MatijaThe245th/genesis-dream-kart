@@ -10,7 +10,7 @@ const TOP_SPEED: float = 60.0
 const MIN_SPEED: float = -45.0
 const ACCELERATION: float = 1.75
 const STEERING_STRENGTH: float = 12.0
-const TURN_SPEED: float = 7.0
+const TURN_SPEED: float = 7.5
 const GRAVITY: float = 50.0
 
 const DRIFT_FORCE_MIN: float = 0.125
@@ -34,20 +34,21 @@ var is_drifting: bool = false
 var is_boosting: bool = false
 
 # Dynamic variables
-var acceleration_input: float
-var steering_input: float
+var acceleration_input: float = 0.0
+var steering_input: float = 0.0
 var forward_direction: int = 0
 var current_speed: float = 0.0
 var speed_force: float = 0.0
 var turn_force: float = 0.0
 var drift_direction: float = 0.0
 var drift_boost_stage: int = 0
-var ground_normal: Vector3
+var ground_normal: Vector3 = Vector3.UP
 var new_transform: Transform3D
 var horizontal_velocity: Vector3
 var vertical_velocity: Vector3
 var drift_amount: float
 var slope_angle: float
+var normal_interpolation_speed: float
 
 
 func _physics_process(delta):
@@ -58,10 +59,7 @@ func _physics_process(delta):
 		forward_direction = 0
 	
 	acceleration_input = Input.get_axis("Brake", "Accelerate")
-	if forward_direction == -1:
-		steering_input = Input.get_axis("Left", "Right")
-	else:
-		steering_input = Input.get_axis("Right", "Left")
+	steering_input = Input.get_axis("Right", "Left") * forward_direction
 	
 	# Handle basic movement
 	if is_boosting:
@@ -116,12 +114,13 @@ func _physics_process(delta):
 	# Align car to slopes
 	if RayCast.is_colliding():
 		ground_normal = RayCast.get_collision_normal()
-		new_transform = align_with_y(global_transform, ground_normal)
-		global_transform = global_transform.interpolate_with(new_transform, 10.0 * delta)
+		normal_interpolation_speed = 10.0
 	else:
 		ground_normal = Vector3.UP
-		new_transform = align_with_y(global_transform, ground_normal)
-		global_transform = global_transform.interpolate_with(new_transform, 1.5 * delta)
+		normal_interpolation_speed = 1.5
+		
+	new_transform = align_with_y(global_transform, ground_normal)
+	global_transform = global_transform.interpolate_with(new_transform, normal_interpolation_speed * delta)
 	
 	up_direction = ground_normal
 	slope_angle = rad_to_deg(acos(ground_normal.dot(Vector3.UP)))

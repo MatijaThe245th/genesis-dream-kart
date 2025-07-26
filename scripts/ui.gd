@@ -19,9 +19,7 @@ func _ready():
 	show_text = true
 	accelerate_toggle = false
 	brake_toggle = false
-	touch_controls = false
-	LeftContainer.scale = Vector2(0.0, 0.0)
-	RightContainer.scale = Vector2(0.0, 0.0)
+	touch_controls = DisplayServer.is_touchscreen_available()
 
 
 func _process(_delta):
@@ -30,12 +28,16 @@ func _process(_delta):
 		LeftContainer.scale = Vector2(1.0, 1.0)
 		RightContainer.scale = Vector2(1.0, 1.0)
 		if accelerate_toggle == true:
+			change_touch_control_texture(AccelerateButton, 2000.0, 0.0)
 			Input.action_press("Accelerate")
 		else:
+			change_touch_control_texture(AccelerateButton, 0.0, 0.0)
 			Input.action_release("Accelerate")
 		if brake_toggle == true:
+			change_touch_control_texture(BrakeButton, 3000.0, 0.0)
 			Input.action_press("Brake")
 		else:
+			change_touch_control_texture(BrakeButton, 1000.0, 0.0)
 			Input.action_release("Brake")
 	else:
 		LeftContainer.scale = Vector2(0.0, 0.0)
@@ -52,6 +54,10 @@ func _process(_delta):
 		DebugLabel.text = "speed_force: " + str(TestCar.speed_force) + "\n" + "turn_force: " + str(TestCar.turn_force) + "\n" + "current_speed: " + str(TestCar.current_speed) + "\n" + "drift_boost_stage: " + str(TestCar.drift_boost_stage) + "\n" + "forward_direction: " + str(TestCar.forward_direction) + "\n" + "acceleration_input: " + str(TestCar.acceleration_input) + "\n" + "steering_input: " + str(TestCar.steering_input) + "\n" + "drift_direction: " + str(TestCar.drift_direction) + "\n" + "drift_amount: " + str(TestCar.drift_amount) + "\n" + "is_drifting: " + str(TestCar.is_drifting) + "\n" + "slope_angle: " + str(TestCar.slope_angle)
 	else:
 		DebugLabel.text = ""
+
+
+func change_touch_control_texture(node: TouchScreenButton, region_x: float, region_y: float):
+	node.texture_normal.region = Rect2(region_x, region_y, 1000.0, 999.0)
 
 
 func _input(event):
