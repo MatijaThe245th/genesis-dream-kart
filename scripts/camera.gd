@@ -21,7 +21,10 @@ const OFFSET_DRIFT: float = 5.0
 # Dynamic variables
 var speed_factor: float
 var target_fov: float
+var target_offset: float
 var target_camera_distance: float
+var fov_lerp_factor: float
+var distance_lerp_factor: float
 
 
 func _ready():
@@ -35,26 +38,39 @@ func _process(delta):
 	speed_factor = clamp(speed_factor, 0.0, 1.0)
 	
 	# Handle camera FOV and distance
-	if TestCar.forward_direction == -1:
-		target_fov = lerp(FOV_NORMAL, FOV_MIN, speed_factor)
-		target_camera_distance = lerp(DISTANCE_NORMAL, DISTANCE_MIN, speed_factor)
+	if TestCar.forward_direction == -1 and TestCar.acceleration_input < 0.0:
+		target_fov = FOV_MIN
+		target_camera_distance = DISTANCE_MIN
+		fov_lerp_factor = 5.0 * speed_factor
+		distance_lerp_factor = 5.0 * speed_factor
 	elif TestCar.is_boosting:
 		target_fov = FOV_BOOST
 		target_camera_distance = DISTANCE_BOOST
+		fov_lerp_factor = 10.0
+		distance_lerp_factor = 10.0
+	elif TestCar.forward_direction == 1 and TestCar.acceleration_input > 0.0:
+		target_fov = FOV_MAX
+		target_camera_distance = DISTANCE_MAX
+		fov_lerp_factor = 5.0 * speed_factor
+		distance_lerp_factor = 5.0 * speed_factor
 	else:
-		target_fov = lerp(FOV_NORMAL, FOV_MAX, speed_factor)
-		target_camera_distance = lerp(DISTANCE_NORMAL, DISTANCE_MAX, speed_factor)
+		target_fov = FOV_NORMAL
+		target_camera_distance = DISTANCE_NORMAL
+		fov_lerp_factor = 1.5
+		distance_lerp_factor = 1.5
 	
-	Camera.fov = lerp(Camera.fov, target_fov, 5.0 * delta)
-	Camera.position.z = lerp(Camera.position.z, target_camera_distance, 5.0 * delta)
+	Camera.fov = lerp(Camera.fov, target_fov, fov_lerp_factor * delta)
+	Camera.position.z = lerp(Camera.position.z, target_camera_distance, distance_lerp_factor * delta)
 	
 	# Handle camera horizontal offset
 	if TestCar.is_drifting:
-		Camera.h_offset = lerp(Camera.h_offset, OFFSET_DRIFT * -TestCar.drift_direction, 2.5 * delta)
+		target_offset = OFFSET_DRIFT * -TestCar.drift_direction
 	elif TestCar.turn_force != 0.0 and TestCar.current_speed > 0.75:
-		Camera.h_offset = lerp(Camera.h_offset, OFFSET_NORMAL * -TestCar.turn_force * abs(TestCar.acceleration_input), 2.5 * delta)
+		target_offset = OFFSET_NORMAL * -TestCar.turn_force * abs(TestCar.acceleration_input)
 	else:
-		Camera.h_offset = lerp(Camera.h_offset, 0.0, 2.5 * delta)
+		target_offset = 0.0
+	
+	Camera.h_offset = lerp(Camera.h_offset, target_offset, 2.5 * delta)
 	
 	# Flip camera when reversing
 	if TestCar.acceleration_input < 0.0 and TestCar.speed_force < 0.0:
